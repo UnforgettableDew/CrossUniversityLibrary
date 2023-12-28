@@ -11,6 +11,4 @@ public class TestController {
     public String hello(){
         return "HELLO";
     }
-
-
 }

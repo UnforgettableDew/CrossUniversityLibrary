@@ -102,10 +102,4 @@ public class JwtService {
         return userCredentialsRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User with email=" + email + " not found"));
     }
-
-    public String checkHeader(String token){
-        if(token == null || !token.startsWith("Bearer "))
-            throw new IllegalArgumentException("Header is null or doesn't start with 'Bearer '");
-        return token.substring("Bearer".length());
-    }
 }

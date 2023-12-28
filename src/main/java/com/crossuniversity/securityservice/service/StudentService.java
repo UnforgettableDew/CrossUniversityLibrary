@@ -2,7 +2,6 @@ package com.crossuniversity.securityservice.service;
 
 import com.crossuniversity.securityservice.entity.Library;
 import com.crossuniversity.securityservice.entity.UniversityUser;
-import com.crossuniversity.securityservice.exception.UserNotFoundException;
 import com.crossuniversity.securityservice.repository.UniversityUserRepository;
 import com.crossuniversity.securityservice.security.JwtService;
 import lombok.extern.slf4j.Slf4j;

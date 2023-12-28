@@ -19,14 +19,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final PasswordEncoder passwordEncoder;
     private final UserDetailsService userDetailsService;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     @Autowired
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    public SecurityConfig(PasswordEncoder passwordEncoder,
+                          UserDetailsService userDetailsService, JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.passwordEncoder = passwordEncoder;
         this.userDetailsService = userDetailsService;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
     @Bean
@@ -40,8 +41,7 @@ public class SecurityConfig {
                             "/auth/**",
                             "/swagger-ui/**", "/v3/api-docs/**",
                             "/swagger-resources/**").permitAll()
-                    .requestMatchers("/test/**").hasRole("GUEST")
-                .requestMatchers("/student/**").hasRole("STUDENT")
+                .requestMatchers("/student/**", "/test/**").hasRole("STUDENT")
                 .anyRequest()
                 .authenticated()
                 .and()
@@ -49,7 +49,7 @@ public class SecurityConfig {
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                     .authenticationProvider(authenticationProvider())
-                    .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }
 
@@ -60,4 +60,5 @@ public class SecurityConfig {
         authenticationProvider.setPasswordEncoder(passwordEncoder);
         return authenticationProvider;
     }
+
 }
