@@ -1,7 +1,8 @@
 package com.crossuniversity.securityservice.security;
 
-import com.crossuniversity.securityservice.entity.AppUser;
-import com.crossuniversity.securityservice.repository.UserRepository;
+import com.crossuniversity.securityservice.entity.UserCredentials;
+import com.crossuniversity.securityservice.exception.UserNotFoundException;
+import com.crossuniversity.securityservice.repository.UserCredentialsRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -28,11 +29,11 @@ public class JwtService {
     private Long accessExpiration;
     @Value("${application.security.jwt.refresh-token.expiration}")
     private Long refreshExpiration;
-    private final UserRepository userRepository;
+    private final UserCredentialsRepository userCredentialsRepository;
 
     @Autowired
-    public JwtService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public JwtService(UserCredentialsRepository userCredentialsRepository) {
+        this.userCredentialsRepository = userCredentialsRepository;
     }
 
     public String extractEmail(String token) {
@@ -95,11 +96,11 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public AppUser getUserByJwt(HttpServletRequest request) {
+    public UserCredentials getUserByJwt(HttpServletRequest request) {
         String jwtToken = request.getHeader(HttpHeaders.AUTHORIZATION).substring(7);
         String email = extractEmail(jwtToken);
-        return userRepository.findByEmail(email);
-//                .orElseThrow(() -> new UsernameNotFoundException("User with email=" + email + " not found"));
+        return userCredentialsRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User with email=" + email + " not found"));
     }
 
     public String checkHeader(String token){

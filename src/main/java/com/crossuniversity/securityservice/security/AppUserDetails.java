@@ -1,6 +1,6 @@
 package com.crossuniversity.securityservice.security;
 
-import com.crossuniversity.securityservice.entity.AppUser;
+import com.crossuniversity.securityservice.entity.UserCredentials;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -68,11 +68,11 @@ public class AppUserDetails implements UserDetails {
         return isEnabled;
     }
 
-    public static AppUserDetails convertToUserDetails(AppUser appUser) {
+    public static AppUserDetails convertToUserDetails(UserCredentials userCredentials) {
         return new AppUserDetails(
-                Set.of(new SimpleGrantedAuthority("ROLE_" + appUser.getRole().name())),
-                appUser.getPassword(),
-                appUser.getEmail(),
+                Set.of(new SimpleGrantedAuthority("ROLE_" + userCredentials.getRole().getRoleName())),
+                userCredentials.getPassword(),
+                userCredentials.getEmail(),
                 true,
                 true,
                 true,

@@ -13,7 +13,7 @@ public class SecurityAuthenticationEntryPoint implements AuthenticationEntryPoin
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
-        
+
         BasicFilterExceptionResponse.generateFilterExceptionResponse(
                 request,
                 response,

@@ -36,8 +36,12 @@ public class SecurityConfig {
                 .authenticationEntryPoint(new SecurityAuthenticationEntryPoint())
                 .and()
                 .authorizeHttpRequests()
-                    .requestMatchers("/auth/**").permitAll()
+                    .requestMatchers(
+                            "/auth/**",
+                            "/swagger-ui/**", "/v3/api-docs/**",
+                            "/swagger-resources/**").permitAll()
                     .requestMatchers("/test/**").hasRole("GUEST")
+                .requestMatchers("/student/**").hasRole("STUDENT")
                 .anyRequest()
                 .authenticated()
                 .and()
