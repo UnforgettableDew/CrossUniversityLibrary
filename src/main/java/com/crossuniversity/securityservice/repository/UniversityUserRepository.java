@@ -8,5 +8,5 @@ import java.util.Optional;
 
 public interface UniversityUserRepository extends JpaRepository<UniversityUser, Long> {
     @Query("select uu from UniversityUser uu join uu.userCredentials uc where uc.email=:email")
-    UniversityUser findUniversityUserByEmail(String email);
+    Optional<UniversityUser> findUniversityUserByEmail(String email);
 }

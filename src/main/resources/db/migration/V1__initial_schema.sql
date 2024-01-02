@@ -25,8 +25,7 @@ create table university
 create table university_user
 (
     id                  bigserial primary key,
-    first_name          varchar(64) not null,
-    last_name           varchar(64) not null,
+    user_name          varchar(64) not null,
     space               float,
     university_id       bigint,
     user_credentials_id bigint unique,
@@ -43,7 +42,11 @@ create table library
     id             bigserial primary key,
     title          varchar(255) not null,
     topic          varchar(128),
-    library_access boolean
+    library_access boolean,
+    university_id       bigint,
+    foreign key (university_id) references university (id)
+        on delete cascade
+        on update cascade
 );
 
 create table documents

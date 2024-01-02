@@ -24,7 +24,8 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     @Autowired
     public SecurityConfig(PasswordEncoder passwordEncoder,
-                          UserDetailsService userDetailsService, JwtAuthenticationFilter jwtAuthenticationFilter) {
+                          UserDetailsService userDetailsService,
+                          JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.passwordEncoder = passwordEncoder;
         this.userDetailsService = userDetailsService;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
@@ -33,15 +34,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf().disable()
-                .exceptionHandling().accessDeniedHandler(new SecurityAccessDeniedHandler())
-                .authenticationEntryPoint(new SecurityAuthenticationEntryPoint())
-                .and()
+//                .exceptionHandling().accessDeniedHandler(new SecurityAccessDeniedHandler())
+//                .authenticationEntryPoint(new SecurityAuthenticationEntryPoint())
+//                .and()
                 .authorizeHttpRequests()
                     .requestMatchers(
                             "/auth/**",
                             "/swagger-ui/**", "/v3/api-docs/**",
                             "/swagger-resources/**").permitAll()
-                .requestMatchers("/student/**", "/test/**").hasRole("STUDENT")
+                .requestMatchers("/library/**", "/test/**").hasRole("STUDENT")
                 .anyRequest()
                 .authenticated()
                 .and()

@@ -18,16 +18,16 @@ values ('student1kpi@kpi.ua', '$2a$10$G.zFDgVn.PBnE146DeFqZea0Fxzfo.agIMEIM1h/BL
        ('admin1kpi@kpi.ua', '$2a$10$F8GPagO2KGjdK0vMWqSVTeGztv06CzZpqpS96m8wpqU9Acd3Kx7Aq', 5),
        ('globaladmin1@library.ua', '$2a$10$09g0rK18EKvryB40dOZhGOjGEZZaZNGsDApzibOoZt8QF6i9TFWSG', 4);
 
-insert into university_user(first_name, last_name, space, university_id, user_credentials_id)
-values ('student1_name', 'student1_surname', 1024, 1, 1),
-       ('teacher1_name', 'teacher1_surname', null, 1, 2),
-       ('university_admin1_name', 'university_admin1_surname', null, 1, 3),
-       ('global_admin1_name', 'global_admin1_surname', null, null, 4);
+insert into university_user(user_name, space, university_id, user_credentials_id)
+values ('student1_name', 1024, 1, 1),
+       ('teacher1_name', null, 1, 2),
+       ('university_admin1_name', null, 1, 3),
+       ('global_admin1_name', null, null, 4);
 
-insert into library (title, topic, library_access)
-values ('Teacher1_library', 'Science', true),
-       ('Teacher2_library', 'Math', false),
-       ('Student1_library', 'History', false);
+insert into library (title, topic, library_access, university_id)
+values ('Teacher1_library', 'Science', true, 1),
+       ('Teacher2_library', 'Math', false, 1),
+       ('Student1_library', 'History', false, 1);
 
 insert into documents (title, topic, description, file_path, owner_id, library_id)
 values ('Document 1', 'Science', 'Description for Document 1', '/path/to/document1.pdf', 1, 1),

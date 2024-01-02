@@ -1,7 +1,10 @@
 package com.crossuniversity.securityservice.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+
+import static jakarta.persistence.CascadeType.*;
 
 @Entity
 @Table(name = "documents")
@@ -28,7 +31,8 @@ public class Document {
     @Column(name = "file_path", nullable = false)
     private String filePath;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = ALL)
     @JoinColumn(name = "owner_id")
+    @JsonIgnore
     private UniversityUser owner;
 }

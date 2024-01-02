@@ -1,7 +1,10 @@
 package com.crossuniversity.securityservice.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "university")
@@ -21,4 +24,8 @@ public class University {
 
     @Column(name = "domain", nullable = false)
     private String domain;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "university")
+    @JsonIgnore
+    private List<Library> libraries;
 }
