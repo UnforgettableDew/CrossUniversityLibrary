@@ -10,6 +10,7 @@ import com.crossuniversity.securityservice.exception.UserNotFoundException;
 import com.crossuniversity.securityservice.repository.LibraryRepository;
 import com.crossuniversity.securityservice.repository.UniversityRepository;
 import com.crossuniversity.securityservice.repository.UniversityUserRepository;
+import com.crossuniversity.securityservice.utils.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.expression.AccessException;
@@ -24,22 +25,17 @@ public class LibraryService {
     private final UniversityUserRepository universityUserRepository;
     private final UniversityRepository universityRepository;
     private final LibraryRepository libraryRepository;
+    private final SecurityUtils securityUtils;
 
     @Autowired
     public LibraryService(UniversityUserRepository universityUserRepository,
                           UniversityRepository universityRepository,
-                          LibraryRepository libraryRepository) {
+                          LibraryRepository libraryRepository,
+                          SecurityUtils securityUtils) {
         this.universityUserRepository = universityUserRepository;
         this.universityRepository = universityRepository;
         this.libraryRepository = libraryRepository;
-    }
-
-    private UniversityUser getUserFromSecurityContextHolder() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        log.info("User with email = " + email + " was found");
-
-        return universityUserRepository.findUniversityUserByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User with email = " + email + " doesn't exists"));
+        this.securityUtils = securityUtils;
     }
 
     private Library getLibraryById(Long libraryId) {
@@ -48,7 +44,7 @@ public class LibraryService {
     }
 
     private boolean checkLibraryOwnerAccess(Long libraryId) {
-        UniversityUser universityUser = getUserFromSecurityContextHolder();
+        UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
         boolean flag = false;
         for (Library library : universityUser.getOwnLibraries()) {
             if (library.getId().equals(libraryId))
@@ -58,7 +54,7 @@ public class LibraryService {
     }
 
     private boolean checkLibrarySubscriberAccess(Long libraryId) {
-        UniversityUser universityUser = getUserFromSecurityContextHolder();
+        UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
         boolean flag = false;
         for (Library library : universityUser.getSubscribedLibraries()) {
             if (library.getId().equals(libraryId))
@@ -68,12 +64,12 @@ public class LibraryService {
     }
 
     public List<Library> getOwnLibraries() {
-        UniversityUser universityUser = getUserFromSecurityContextHolder();
+        UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
         return universityUser.getOwnLibraries();
     }
 
     public List<Library> getSubscribedLibraries() {
-        UniversityUser universityUser = getUserFromSecurityContextHolder();
+        UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
         return universityUser.getSubscribedLibraries();
     }
 
@@ -104,7 +100,7 @@ public class LibraryService {
     }
 
     public Library createLibrary(LibraryDTO libraryDTO) {
-        UniversityUser universityUser = getUserFromSecurityContextHolder();
+        UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
         Library library = Library.parseDtoToEntity(libraryDTO);
         library.setUniversity(universityUser.getUniversity());
         libraryRepository.save(library);
@@ -115,7 +111,7 @@ public class LibraryService {
     }
 
     public List<Library> subscribeOnLibrary(Long libraryId) {
-        UniversityUser universityUser = getUserFromSecurityContextHolder();
+        UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
         Library library = getLibraryById(libraryId);
 
         universityUser.addSubscribedLibrary(library);
@@ -146,7 +142,7 @@ public class LibraryService {
     }
 
     public List<Library> unsubscribeLibrary(Long libraryId) {
-        UniversityUser universityUser = getUserFromSecurityContextHolder();
+        UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
         Library library = getLibraryById(libraryId);
 
         universityUser.removeSubscribedLibrary(library);

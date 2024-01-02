@@ -4,20 +4,22 @@ import com.crossuniversity.securityservice.auth.AuthenticationRequest;
 import com.crossuniversity.securityservice.auth.AuthenticationResponse;
 import com.crossuniversity.securityservice.auth.RegistrationRequest;
 import com.crossuniversity.securityservice.dto.CredentialDTO;
+import com.crossuniversity.securityservice.entity.University;
 import com.crossuniversity.securityservice.entity.UniversityUser;
 import com.crossuniversity.securityservice.entity.UserCredentials;
 import com.crossuniversity.securityservice.entity.UserRole;
 import com.crossuniversity.securityservice.exception.UserAlreadyExistsException;
-import com.crossuniversity.securityservice.exception.UserNotFoundException;
+import com.crossuniversity.securityservice.repository.UniversityRepository;
 import com.crossuniversity.securityservice.repository.UniversityUserRepository;
 import com.crossuniversity.securityservice.repository.UserCredentialsRepository;
 import com.crossuniversity.securityservice.repository.UserRoleRepository;
 import com.crossuniversity.securityservice.security.AppUserDetails;
 import com.crossuniversity.securityservice.security.JwtService;
+import com.crossuniversity.securityservice.utils.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.expression.AccessException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,6 +39,8 @@ public class AuthenticationService {
     private final UserRoleRepository userRoleRepository;
     private final PasswordEncoder passwordEncoder;
     private final UniversityUserRepository universityUserRepository;
+    private final UniversityRepository universityRepository;
+    private final SecurityUtils securityUtils;
 
     public AuthenticationService(AuthenticationManager authenticationManager,
                                  JwtService jwtService,
@@ -44,7 +48,9 @@ public class AuthenticationService {
                                  UserCredentialsRepository userCredentialsRepository,
                                  UserRoleRepository userRoleRepository,
                                  PasswordEncoder passwordEncoder,
-                                 UniversityUserRepository universityUserRepository) {
+                                 UniversityUserRepository universityUserRepository,
+                                 UniversityRepository universityRepository,
+                                 SecurityUtils securityUtils) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
@@ -52,6 +58,8 @@ public class AuthenticationService {
         this.userRoleRepository = userRoleRepository;
         this.passwordEncoder = passwordEncoder;
         this.universityUserRepository = universityUserRepository;
+        this.universityRepository = universityRepository;
+        this.securityUtils = securityUtils;
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -66,79 +74,68 @@ public class AuthenticationService {
         return new AuthenticationResponse(accessToken, refreshToken);
     }
 
-    public AuthenticationResponse register(RegistrationRequest request) {
+    public AuthenticationResponse registerStudent(RegistrationRequest request) {
         String email = request.getEmail();
-
         checkEmailExistence(email);
+        String domain = getDomain(email);
 
-        UserRole userRole = userRoleRepository.findUserRoleByRoleName("STUDENT");
-        UserCredentials user = UserCredentials.builder()
-                .email(email)
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(userRole)
-                .build();
+        University university = universityRepository.findUniversityByDomain(domain);
 
-        userCredentialsRepository.save(user);
-        log.info("User with email = " + email + " was registered");
+        if (university != null) {
+            UserCredentials studentCredentials = saveUser(request.getEmail(), email, "STUDENT", university);
 
-        AppUserDetails securityUser = AppUserDetails.convertToUserDetails(user);
+            AppUserDetails securityUser = AppUserDetails.convertToUserDetails(studentCredentials);
 
-        String accessToken = jwtService.generateAccessToken(securityUser);
-        String refreshToken = jwtService.generateRefreshToken(securityUser);
+            String accessToken = jwtService.generateAccessToken(securityUser);
+            String refreshToken = jwtService.generateRefreshToken(securityUser);
 
-        return new AuthenticationResponse(accessToken, refreshToken);
+            return new AuthenticationResponse(accessToken, refreshToken);
+        } else throw new IllegalArgumentException("University domain = " + domain + " does not exist");
     }
 
     public CredentialDTO registerTeacher(String email) {
         checkEmailExistence(email);
-        UniversityUser universityUser = getUserFromSecurityContextHolder();
 
-        UserCredentials adminCredentials = universityUser.getUserCredentials();
-        String roleName = adminCredentials.getRole().getRoleName();
+        UniversityUser universityAdmin = securityUtils.getUserFromSecurityContextHolder();
 
-        if (roleName.equals("UNIVERSITY_ADMIN") && getDomain(adminCredentials.getEmail()).equals(getDomain(email))) {
-            UserRole userRole = userRoleRepository.findUserRoleByRoleName("TEACHER");
+        UserCredentials adminCredentials = universityAdmin.getUserCredentials();
+        String role = adminCredentials.getRole().getRoleName();
+        String domain = getDomain(adminCredentials.getEmail());
 
-            String randomPassword = getRandomString();
+        if (role.equals("UNIVERSITY_ADMIN") && domain.equals(getDomain(email))) {
+            String randomPassword = securityUtils.generateRandomSequence();
 
-            UserCredentials user = UserCredentials.builder()
-                    .email(email)
-                    .password(passwordEncoder.encode(randomPassword))
-                    .role(userRole)
-                    .build();
-
-            userCredentialsRepository.save(user);
-            log.info("Teacher with email = " + email + " was registered");
+            saveUser(email, randomPassword, "TEACHER", universityRepository.findUniversityByDomain(domain));
             return new CredentialDTO(email, randomPassword);
-        } else throw new IllegalArgumentException("Invalid university email");
+        } else throw new IllegalArgumentException("University domain = " + domain + " does not exist");
     }
 
-    private String getRandomString() {
-        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-        StringBuilder stringBuilder = new StringBuilder();
-        Random random = new Random();
+    private UserCredentials saveUser(String email, String password, String role, University university) {
+        UserRole userRole = userRoleRepository.findUserRoleByRoleName(role);
 
-        for (int i = 0; i < 5; i++) {
-            char randomChar = characters.charAt(random.nextInt(characters.length()));
-            stringBuilder.append(randomChar);
-        }
+        UserCredentials userCredentials = UserCredentials.builder()
+                .email(email)
+                .password(passwordEncoder.encode(password))
+                .role(userRole)
+                .build();
 
+        UniversityUser user = UniversityUser.builder()
+                .userName(email)
+                .university(university)
+                .userCredentials(userCredentials)
+                .build();
 
-        return stringBuilder.toString();
+        universityUserRepository.save(user);
+        log.info("User with email = " + email + " was registered");
+        return userCredentials;
     }
+
 
     private void checkEmailExistence(String email) {
         if (userCredentialsRepository.findByEmail(email).isPresent())
             throw new UserAlreadyExistsException("User with email = " + email + " already exists");
     }
 
-    private UniversityUser getUserFromSecurityContextHolder() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        log.info("User with email = " + email + " was found");
-
-        return universityUserRepository.findUniversityUserByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User with email = " + email + " doesn't exists"));
-    }
 
     private String getDomain(String email) {
         String regex = "@(.+)$";
@@ -146,12 +143,9 @@ public class AuthenticationService {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(email);
 
-        if (matcher.find()) {
-            String group = matcher.group(1);
-            return group;
-        } else {
+        if (matcher.find())
+            return matcher.group(1);
+        else
             throw new IllegalArgumentException("Invalid university email");
-        }
     }
-
 }
