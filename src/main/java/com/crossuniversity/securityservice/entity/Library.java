@@ -31,11 +31,11 @@ public class Library {
     private boolean libraryAccess;
 
     @JsonIgnore
-    @ManyToMany(cascade = {MERGE, PERSIST, REFRESH}, mappedBy = "ownLibraries", fetch = FetchType.LAZY)
+    @ManyToMany(cascade = ALL, mappedBy = "ownLibraries", fetch = FetchType.LAZY)
     private List<UniversityUser> owners;
 
     @JsonIgnore
-    @ManyToMany(cascade = {MERGE, PERSIST, REFRESH}, mappedBy = "subscribedLibraries", fetch = FetchType.LAZY)
+    @ManyToMany(cascade = ALL, mappedBy = "subscribedLibraries", fetch = FetchType.LAZY)
     private List<UniversityUser> subscribers;
 
     @JsonIgnore

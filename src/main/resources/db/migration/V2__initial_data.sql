@@ -25,9 +25,9 @@ values ('student1_name', 1024, 1, 1),
        ('global_admin1_name', null, null, 4);
 
 insert into library (title, topic, library_access, university_id)
-values ('Teacher1_library', 'Science', true, 1),
-       ('Teacher2_library', 'Math', false, 1),
-       ('Student1_library', 'History', false, 1);
+values ('Teacher1_library1', 'Science', true, 1),
+       ('Teacher1_library2', 'Math', false, 1),
+       ('Student1_library1', 'History', false, 1);
 
 insert into documents (title, topic, description, file_path, owner_id, library_id)
 values ('Document 1', 'Science', 'Description for Document 1', '/path/to/document1.pdf', 1, 1),

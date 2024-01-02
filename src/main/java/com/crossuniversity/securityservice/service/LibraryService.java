@@ -169,7 +169,8 @@ public class LibraryService {
 
     public void deleteLibrary(Long libraryId) throws AccessException {
         if (checkLibraryOwnerAccess(libraryId)) {
-            libraryRepository.deleteById(libraryId);
+            int rows = libraryRepository.deleteLibrary(libraryId);
+            log.info("Delete from library table");
         } else throw new AccessException("Access restricted");
     }
 

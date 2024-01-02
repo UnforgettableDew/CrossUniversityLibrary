@@ -76,14 +76,14 @@ public class LibraryController {
     public ResponseEntity<?> subscribeUser(@PathVariable Long libraryId,
                                            @PathVariable String email) throws AccessException {
         libraryService.subscribeUser(libraryId, email);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PostMapping("{libraryId}/unsubscribe/{email}")
     public ResponseEntity<?> unsubscribeUser(@PathVariable Long libraryId,
                                              @PathVariable String email) throws AccessException {
         libraryService.unsubscribeUser(libraryId, email);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PostMapping("/{libraryId}/unsubscribe")
@@ -96,10 +96,9 @@ public class LibraryController {
         return new ResponseEntity<>(libraryService.updateLibrary(libraryDTO), HttpStatus.OK);
     }
 
-    // TODO: 30.12.2023
     @DeleteMapping("/{libraryId}/delete")
     public ResponseEntity<?> deleteLibrary(@PathVariable Long libraryId) throws AccessException {
         libraryService.deleteLibrary(libraryId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

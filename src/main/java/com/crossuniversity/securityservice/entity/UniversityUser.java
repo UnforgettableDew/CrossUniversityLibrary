@@ -40,7 +40,7 @@ public class UniversityUser {
     @OneToMany(cascade = ALL, fetch = FetchType.LAZY, mappedBy = "owner")
     private List<Document> documents;
 
-    @ManyToMany(cascade = {MERGE, PERSIST, REFRESH})
+    @ManyToMany(cascade = ALL)
     @JoinTable(
             name = "user_library_owners",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -49,7 +49,7 @@ public class UniversityUser {
     @JsonIgnore
     private List<Library> ownLibraries;
 
-    @ManyToMany(cascade = {MERGE, PERSIST, REFRESH})
+    @ManyToMany(cascade = ALL)
     @JoinTable(
             name = "user_library_subscribers",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -68,5 +68,9 @@ public class UniversityUser {
 
     public void removeSubscribedLibrary(Library library){
         this.subscribedLibraries.remove(library);
+    }
+
+    public void removeOwnLibrary(Library library){
+        this.ownLibraries.remove(library);
     }
 }

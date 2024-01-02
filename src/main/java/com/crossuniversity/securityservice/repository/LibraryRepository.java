@@ -2,7 +2,9 @@ package com.crossuniversity.securityservice.repository;
 
 import com.crossuniversity.securityservice.entity.Library;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -27,4 +29,9 @@ public interface LibraryRepository extends JpaRepository<Library, Long> {
     @Query("select l from Library l join l.owners lo " +
             "where lo.userName=:userName and l.title=:title and l.topic=:topic")
     List<Library> findLibrariesByTitleAndTopicAndOwner(String title, String topic, String userName);
+
+    @Modifying
+    @Transactional
+    @Query(value = "delete from library where library.id =:libraryId", nativeQuery = true)
+    int deleteLibrary(Long libraryId);
 }
