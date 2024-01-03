@@ -18,14 +18,17 @@ spring:
     host: 'smtp.gmail.com'
     port: 587
     username: 'sagittariusdew@gmail.com'
-    password: 'ecmmwabvoyrtmrfe
-'
+    password: 'ecmmwabvoyrtmrfe'
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 application:
   security:
     jwt:

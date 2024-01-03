@@ -2,6 +2,7 @@ package com.crossuniversity.securityservice.utils;
 
 public class ConstantMessage {
     public static String PASSWORD_CHANGE_SUBJECT = "CrossUniversityLibrary: Password Reset Request";
+    public static String RANDOM_PASSWORD_SUBJECT = "CrossUniversityLibrary: Account Registration";
 
     public static String passwordChangeMessage(String username, String secretCode){
         return String.format("Dear %s,%n%n" +
@@ -14,4 +15,17 @@ public class ConstantMessage {
                 "Thank you for using CrossUniversityLibrary.%n%n" +
                 "Best regards!", username, secretCode, "http://localhost:8080/user/change-password");
     }
+
+    public static String randomPasswordMessage(String email, String randomPassword, String role) {
+        return String.format("Dear User,%n%n" +
+                "You have been registered as '%s'! Your account has been created successfully.%n" +
+                "To log in, please use the following credentials:%n%n" +
+                "Email: %s%n" +
+                "Password: %s%n%n" +
+                "We recommend changing your password after the first login for security reasons.%n%n" +
+                "Thank you for choosing our service!%n" +
+                "Best regards,%n" +
+                "CrossUniversityLibrary", role, email, randomPassword);
+    }
+
 }

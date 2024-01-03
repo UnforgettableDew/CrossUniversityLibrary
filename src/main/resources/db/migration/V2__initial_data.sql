@@ -29,15 +29,22 @@ values ('Teacher1_library1', 'Science', true, 1),
        ('Teacher1_library2', 'Math', false, 1),
        ('Student1_library1', 'History', false, 1);
 
-insert into documents (title, topic, description, file_path, owner_id, library_id)
-values ('Document 1', 'Science', 'Description for Document 1', '/path/to/document1.pdf', 1, 1),
-       ('Document 2', 'Science', 'Description for Document 2', '/path/to/document2.pdf', 2, 1),
-       ('Document 3', 'Science', 'Description for Document 3', '/path/to/document3.pdf', 3, 1),
-       ('Document 4', 'Math Science', 'Description for Document 4', '/path/to/document4.pdf', 1, 2),
-       ('Document 5', 'Math', 'Description for Document 5', '/path/to/document5.pdf', 2, 2),
-       ('Document 6', 'History', 'Description for Document 6', '/path/to/document6.pdf', 3, 3);
+insert into documents (title, topic, description, file_path, owner_id)
+values ('Document 1', 'Science', 'Description for Document 1', '/path/to/document1.pdf', 1),
+       ('Document 2', 'Science', 'Description for Document 2', '/path/to/document2.pdf', 2),
+       ('Document 3', 'Science', 'Description for Document 3', '/path/to/document3.pdf', 3),
+       ('Document 4', 'Math Science', 'Description for Document 4', '/path/to/document4.pdf', 1),
+       ('Document 5', 'Math', 'Description for Document 5', '/path/to/document5.pdf', 2),
+       ('Document 6', 'History', 'Description for Document 6', '/path/to/document6.pdf', 3);
 
-
+insert into library_documents(library_id, document_id)
+values (1, 1),
+       (1, 2),
+       (1, 3),
+       (1, 4),
+       (2, 4),
+       (2, 5),
+       (3, 6);
 
 insert into user_library_owners (user_id, library_id)
 values (2, 1),

@@ -38,9 +38,13 @@ public class Library {
     @ManyToMany(cascade = ALL, mappedBy = "subscribedLibraries", fetch = FetchType.LAZY)
     private List<UniversityUser> subscribers;
 
+    @ManyToMany(cascade = ALL, fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "library_documents",
+            joinColumns = @JoinColumn(name = "library_id"),
+            inverseJoinColumns = @JoinColumn(name = "document_id")
+    )
     @JsonIgnore
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "library_id")
     private List<Document> documents;
 
     @JsonIgnore
@@ -54,5 +58,13 @@ public class Library {
                 .topic(libraryDTO.getTopic())
                 .libraryAccess(libraryDTO.isLibraryAccess())
                 .build();
+    }
+
+    public void addDocument(Document document){
+        this.documents.add(document);
+    }
+
+    public void removeDocument(Document document){
+        this.documents.remove(document);
     }
 }

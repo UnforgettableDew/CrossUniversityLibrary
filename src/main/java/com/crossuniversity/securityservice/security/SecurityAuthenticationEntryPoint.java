@@ -18,7 +18,7 @@ public class SecurityAuthenticationEntryPoint implements AuthenticationEntryPoin
                 request,
                 response,
                 UNAUTHORIZED,
-                "Wrong username or password"
+                "User unauthorized"
         );
     }
 }

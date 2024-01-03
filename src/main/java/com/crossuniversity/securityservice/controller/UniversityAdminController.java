@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/admin")
-public class AdminController {
+@RequestMapping("/university-admin")
+public class UniversityAdminController {
     private final AuthenticationService authenticationService;
 
 
     @Autowired
-    public AdminController(AuthenticationService authenticationService) {
+    public UniversityAdminController(AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
     }
 

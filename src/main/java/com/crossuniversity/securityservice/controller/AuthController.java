@@ -2,7 +2,7 @@ package com.crossuniversity.securityservice.controller;
 
 import com.crossuniversity.securityservice.auth.AuthenticationRequest;
 import com.crossuniversity.securityservice.auth.AuthenticationResponse;
-import com.crossuniversity.securityservice.auth.RegistrationRequest;
+import com.crossuniversity.securityservice.auth.StudentRegistrationRequest;
 import com.crossuniversity.securityservice.service.AuthenticationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +26,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegistrationRequest request){
+    public ResponseEntity<AuthenticationResponse> register(@RequestBody StudentRegistrationRequest request){
         return new ResponseEntity<>(authenticationService.registerStudent(request), HttpStatus.CREATED);
     }
 }

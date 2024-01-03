@@ -2,7 +2,7 @@ package com.crossuniversity.securityservice.service;
 
 import com.crossuniversity.securityservice.auth.AuthenticationRequest;
 import com.crossuniversity.securityservice.auth.AuthenticationResponse;
-import com.crossuniversity.securityservice.auth.RegistrationRequest;
+import com.crossuniversity.securityservice.auth.StudentRegistrationRequest;
 import com.crossuniversity.securityservice.dto.CredentialDTO;
 import com.crossuniversity.securityservice.entity.University;
 import com.crossuniversity.securityservice.entity.UniversityUser;
@@ -15,9 +15,9 @@ import com.crossuniversity.securityservice.repository.UserCredentialsRepository;
 import com.crossuniversity.securityservice.repository.UserRoleRepository;
 import com.crossuniversity.securityservice.security.AppUserDetails;
 import com.crossuniversity.securityservice.security.JwtService;
+import com.crossuniversity.securityservice.utils.ConstantMessage;
 import com.crossuniversity.securityservice.utils.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.expression.AccessException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,9 +25,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.crossuniversity.securityservice.utils.ConstantMessage.*;
 
 @Service
 @Slf4j
@@ -41,6 +42,7 @@ public class AuthenticationService {
     private final UniversityUserRepository universityUserRepository;
     private final UniversityRepository universityRepository;
     private final SecurityUtils securityUtils;
+    private final MailService mailService;
 
     public AuthenticationService(AuthenticationManager authenticationManager,
                                  JwtService jwtService,
@@ -50,7 +52,8 @@ public class AuthenticationService {
                                  PasswordEncoder passwordEncoder,
                                  UniversityUserRepository universityUserRepository,
                                  UniversityRepository universityRepository,
-                                 SecurityUtils securityUtils) {
+                                 SecurityUtils securityUtils,
+                                 MailService mailService) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
@@ -60,6 +63,7 @@ public class AuthenticationService {
         this.universityUserRepository = universityUserRepository;
         this.universityRepository = universityRepository;
         this.securityUtils = securityUtils;
+        this.mailService = mailService;
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -74,7 +78,7 @@ public class AuthenticationService {
         return new AuthenticationResponse(accessToken, refreshToken);
     }
 
-    public AuthenticationResponse registerStudent(RegistrationRequest request) {
+    public AuthenticationResponse registerStudent(StudentRegistrationRequest request) {
         String email = request.getEmail();
         checkEmailExistence(email);
         String domain = getDomain(email);
@@ -99,18 +103,38 @@ public class AuthenticationService {
         UniversityUser universityAdmin = securityUtils.getUserFromSecurityContextHolder();
 
         UserCredentials adminCredentials = universityAdmin.getUserCredentials();
-        String role = adminCredentials.getRole().getRoleName();
         String domain = getDomain(adminCredentials.getEmail());
 
-        if (role.equals("UNIVERSITY_ADMIN") && domain.equals(getDomain(email))) {
+        if (domain.equals(getDomain(email))) {
             String randomPassword = securityUtils.generateRandomSequence();
-
-            saveUser(email, randomPassword, "TEACHER", universityRepository.findUniversityByDomain(domain));
+            String role = "TEACHER";
+            saveUser(email, randomPassword, role, universityRepository.findUniversityByDomain(domain));
+            mailService.sendEmail(email, RANDOM_PASSWORD_SUBJECT,
+                    randomPasswordMessage(email, randomPassword, role));
             return new CredentialDTO(email, randomPassword);
         } else throw new IllegalArgumentException("University domain = " + domain + " does not exist");
     }
 
-    private UserCredentials saveUser(String email, String password, String role, University university) {
+    public CredentialDTO registerUniversityAdmin(String email) {
+        checkEmailExistence(email);
+        String domain = getDomain(email);
+        University university = universityRepository.findUniversityByDomain(domain);
+
+        if (university != null) {
+            String randomPassword = securityUtils.generateRandomSequence();
+            String role = "UNIVERSITY_ADMIN";
+            saveUser(email, randomPassword, role, university);
+
+            mailService.sendEmail(email, RANDOM_PASSWORD_SUBJECT,
+                    randomPasswordMessage(email, randomPassword, role));
+            return new CredentialDTO(email, randomPassword);
+        } else throw new IllegalArgumentException("University domain = " + domain + " does not exist");
+    }
+
+    private UserCredentials saveUser(String email,
+                                     String password,
+                                     String role,
+                                     University university) {
         UserRole userRole = userRoleRepository.findUserRoleByRoleName(role);
 
         UserCredentials userCredentials = UserCredentials.builder()
@@ -122,6 +146,7 @@ public class AuthenticationService {
         UniversityUser user = UniversityUser.builder()
                 .userName(email)
                 .university(university)
+                .space(role.equals("STUDENT") ? 1000.0 : 15000.0)
                 .userCredentials(userCredentials)
                 .build();
 

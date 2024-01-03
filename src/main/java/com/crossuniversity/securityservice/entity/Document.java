@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static jakarta.persistence.CascadeType.*;
 
 @Entity
@@ -35,4 +38,12 @@ public class Document {
     @JoinColumn(name = "owner_id")
     @JsonIgnore
     private UniversityUser owner;
+
+    @ManyToMany(cascade = ALL, fetch = FetchType.LAZY, mappedBy = "documents")
+    @JsonIgnore
+    private List<Library> libraries;
+
+    public void addLibrary(Library library){
+        this.libraries.add(library);
+    }
 }

@@ -19,7 +19,7 @@ create table university
 (
     id     bigserial primary key,
     title  varchar(255) not null,
-    domain varchar(255) not null
+    domain varchar(255) not null unique
 );
 
 create table university_user
@@ -56,12 +56,20 @@ create table documents
     topic       varchar(128),
     description varchar(1024),
     file_path   varchar(255) not null,
-    library_id  bigint,
     owner_id    bigint,
     foreign key (owner_id) references university_user (id)
         on delete cascade
-        on update cascade,
+        on update cascade
+);
+
+create table library_documents
+(
+    library_id  bigint,
+    document_id bigint,
     foreign key (library_id) references library (id)
+        on delete cascade
+        on update cascade,
+    foreign key (document_id) references documents (id)
         on delete cascade
         on update cascade
 );

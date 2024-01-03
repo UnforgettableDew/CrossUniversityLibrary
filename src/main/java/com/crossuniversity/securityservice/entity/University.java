@@ -1,5 +1,6 @@
 package com.crossuniversity.securityservice.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -22,10 +23,10 @@ public class University {
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "domain", nullable = false)
+    @Column(name = "domain", nullable = false, unique = true)
     private String domain;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "university")
     @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "university")
     private List<Library> libraries;
 }
