@@ -82,7 +82,7 @@ public class SwaggerConstant {
             """
                     {
                       "title": "library1_title",
-                      "topic": "History",
+                      "topic": "History"
                     }
                     """;
 

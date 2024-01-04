@@ -19,9 +19,16 @@ import static com.crossuniversity.securityservice.utils.ResponseCode.*;
 import static com.crossuniversity.securityservice.utils.SwaggerConstant.*;
 import static com.crossuniversity.securityservice.utils.SwaggerConstant.NOT_FOUND_EXCEPTION;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 
 @RestController
 @RequestMapping("/user")
+@CrossOrigin(origins = "*",
+        allowedHeaders = "*",
+        exposedHeaders = "*",
+        methods = {GET, POST, PUT, DELETE},
+        maxAge = 3600)
 @Tag(name = "User Controller")
 public class UserController {
     private final PasswordChangingService passwordChangingService;

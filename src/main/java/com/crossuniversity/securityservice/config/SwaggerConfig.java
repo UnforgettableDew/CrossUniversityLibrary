@@ -1,5 +1,6 @@
 package com.crossuniversity.securityservice.config;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
@@ -13,6 +14,10 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 @Configuration
+@OpenAPIDefinition(
+        servers = {@io.swagger.v3.oas.annotations.servers.Server(url = "http://25.59.220.248:8080", description = "Hamachi Server URL")
+        }
+)
 public class SwaggerConfig {
     private SecurityScheme createAPIKeyScheme() {
         return new SecurityScheme()
