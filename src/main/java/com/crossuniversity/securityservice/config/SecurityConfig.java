@@ -34,9 +34,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf().disable()
-//                .exceptionHandling().accessDeniedHandler(new SecurityAccessDeniedHandler())
-//                .authenticationEntryPoint(new SecurityAuthenticationEntryPoint())
-//                .and()
+                .exceptionHandling()
+                    .accessDeniedHandler(new SecurityAccessDeniedHandler())
+                    .authenticationEntryPoint(new SecurityAuthenticationEntryPoint())
+                .and()
                 .authorizeHttpRequests()
                     .requestMatchers(
                             "/auth/**",
@@ -45,6 +46,8 @@ public class SecurityConfig {
                             "/library/university/{universityId}").permitAll()
                 .requestMatchers("/library/create-teacher")
                     .hasAnyRole("TEACHER", "UNIVERSITY_ADMIN", "GLOBAL_ADMIN")
+                .requestMatchers("/user/**")
+                    .hasAnyRole("STUDENT", "TEACHER", "UNIVERSITY_ADMIN", "GLOBAL_ADMIN")
                 .requestMatchers("/library/**")
                     .hasAnyRole("STUDENT", "TEACHER", "UNIVERSITY_ADMIN", "GLOBAL_ADMIN")
                 .requestMatchers("/university-admin/**")

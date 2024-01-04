@@ -1,6 +1,8 @@
 package com.crossuniversity.securityservice.dto;
 
 import com.crossuniversity.securityservice.entity.Library;
+import com.crossuniversity.securityservice.utils.SwaggerConstant;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -12,7 +14,7 @@ import java.util.List;
 @Builder
 @Schema(description = "An object representing a library")
 public class LibraryDTO {
-    @Schema(example = "3", description = "asfafdasdfasd")
+    @Schema(example = "3")
     private Long id;
 
     @Schema(example = "library_title")
