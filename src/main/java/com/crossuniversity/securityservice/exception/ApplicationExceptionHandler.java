@@ -20,7 +20,7 @@ public class ApplicationExceptionHandler {
             LibraryNotFoundException.class,
             UniversityNotFoundException.class})
     public ResponseEntity<ExceptionResponse> handleUsernameNotFoundException(Exception exception,
-                                                                  HttpServletRequest request) {
+                                                                             HttpServletRequest request) {
         HttpStatus httpStatus = NOT_FOUND;
         ExceptionResponse response = ExceptionResponse.builder()
                 .message(exception.getMessage())
@@ -34,9 +34,10 @@ public class ApplicationExceptionHandler {
 
     @org.springframework.web.bind.annotation.ExceptionHandler(value = {
             UserAlreadyExistsException.class,
-            AuthenticationException.class})
+            AuthenticationException.class,
+            OutOfSpaceException.class})
     public ResponseEntity<ExceptionResponse> handleUsernameAlreadyExistsException(Exception exception,
-                                                                       HttpServletRequest request) {
+                                                                                  HttpServletRequest request) {
         HttpStatus httpStatus = BAD_REQUEST;
 
         ExceptionResponse response = ExceptionResponse.builder()
@@ -51,7 +52,7 @@ public class ApplicationExceptionHandler {
 
     @org.springframework.web.bind.annotation.ExceptionHandler(value = {AccessException.class})
     public ResponseEntity<ExceptionResponse> handleAccessException(AccessException exception,
-                                                                       HttpServletRequest request) {
+                                                                   HttpServletRequest request) {
         HttpStatus httpStatus = FORBIDDEN;
 
         ExceptionResponse response = ExceptionResponse.builder()

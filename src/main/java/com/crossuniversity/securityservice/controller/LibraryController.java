@@ -978,7 +978,7 @@ public class LibraryController {
     @DeleteMapping("/document/{documentId}/delete")
     public ResponseEntity<?> deleteDocument(
             @Parameter(description = "ID of the document to be deleted")
-            @PathVariable Long documentId) throws AccessException {
+            @PathVariable Long documentId) throws AccessException, IOException {
         libraryService.deleteDocument(documentId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

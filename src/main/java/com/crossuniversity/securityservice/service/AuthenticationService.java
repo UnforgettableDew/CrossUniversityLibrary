@@ -146,7 +146,7 @@ public class AuthenticationService {
         UniversityUser user = UniversityUser.builder()
                 .userName(email)
                 .university(university)
-                .space(role.equals("STUDENT") ? 1000.0 : 15000.0)
+                .space(role.equals("STUDENT") ? 1000.0 : 10000.0)
                 .userCredentials(userCredentials)
                 .build();
 

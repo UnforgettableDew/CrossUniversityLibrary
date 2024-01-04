@@ -34,6 +34,9 @@ public class Document {
     @Column(name = "file_path", nullable = false)
     private String filePath;
 
+    @Column(name = "file_size")
+    private Double fileSize;
+
     @ManyToOne(cascade = ALL)
     @JoinColumn(name = "owner_id")
     @JsonIgnore

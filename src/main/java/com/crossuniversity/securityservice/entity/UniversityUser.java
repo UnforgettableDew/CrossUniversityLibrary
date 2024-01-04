@@ -1,5 +1,6 @@
 package com.crossuniversity.securityservice.entity;
 
+import com.crossuniversity.securityservice.exception.OutOfSpaceException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -58,19 +59,30 @@ public class UniversityUser {
     @JsonIgnore
     private List<Library> subscribedLibraries;
 
-    public void addSubscribedLibrary(Library library){
+    public void addSubscribedLibrary(Library library) {
         this.subscribedLibraries.add(library);
     }
 
-    public void addOwnLibrary(Library library){
+    public void addOwnLibrary(Library library) {
         this.ownLibraries.add(library);
     }
 
-    public void removeSubscribedLibrary(Library library){
+    public void removeSubscribedLibrary(Library library) {
         this.subscribedLibraries.remove(library);
     }
 
-    public void removeOwnLibrary(Library library){
+    public void removeOwnLibrary(Library library) {
         this.ownLibraries.remove(library);
+    }
+
+    public void decreaseSpace(Double fileSize) {
+        if (space > fileSize)
+            this.space -= fileSize;
+        else throw new OutOfSpaceException("Not enough space");
+    }
+
+    public void increaseSpace(Double fileSize) {
+        if (space > fileSize)
+            this.space += fileSize;
     }
 }

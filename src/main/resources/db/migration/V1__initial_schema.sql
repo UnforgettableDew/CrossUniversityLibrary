@@ -26,7 +26,7 @@ create table university_user
 (
     id                  bigserial primary key,
     user_name          varchar(64) not null,
-    space               float,
+    space               double precision,
     university_id       bigint,
     user_credentials_id bigint unique,
     foreign key (university_id) references university (id)
@@ -56,6 +56,7 @@ create table documents
     topic       varchar(128),
     description varchar(1024),
     file_path   varchar(255) not null,
+    file_size double precision,
     owner_id    bigint,
     foreign key (owner_id) references university_user (id)
         on delete cascade

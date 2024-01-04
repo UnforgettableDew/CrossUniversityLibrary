@@ -23,6 +23,7 @@ import org.springframework.expression.AccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
@@ -229,10 +230,12 @@ public class LibraryService {
                     .topic(topic)
                     .description(description)
                     .filePath(path + file.getOriginalFilename())
+                    .fileSize(file.getSize()/1_000_000.0)
                     .libraries(new ArrayList<>())
                     .owner(universityUser)
                     .build();
 
+            universityUser.decreaseSpace(document.getFileSize());
             library.addDocument(document);
 
             documentRepository.save(document);
@@ -304,10 +307,12 @@ public class LibraryService {
         } else throw new AccessException("Access forbidden");
     }
 
-    public void deleteDocument(Long documentId) throws AccessException {
+    public void deleteDocument(Long documentId) throws AccessException, IOException {
         UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
         if (checkDocumentOwnerAccess(documentId, universityUser)) {
-            getDocumentById(documentId);
+            Document document = getDocumentById(documentId);
+
+            universityUser.increaseSpace(document.getFileSize());
 
             documentRepository.deleteDocumentById(documentId);
         } else throw new AccessException("Access forbidden");
