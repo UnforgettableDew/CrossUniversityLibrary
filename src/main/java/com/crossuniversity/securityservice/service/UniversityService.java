@@ -2,7 +2,7 @@ package com.crossuniversity.securityservice.service;
 
 import com.crossuniversity.securityservice.dto.UniversityDTO;
 import com.crossuniversity.securityservice.entity.University;
-import com.crossuniversity.securityservice.model.UniversityRegisterRequest;
+import com.crossuniversity.securityservice.auth.UniversityRegisterRequest;
 import com.crossuniversity.securityservice.repository.UniversityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

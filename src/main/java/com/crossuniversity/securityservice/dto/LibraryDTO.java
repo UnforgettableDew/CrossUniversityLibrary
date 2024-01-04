@@ -12,13 +12,13 @@ import java.util.List;
 @Builder
 @Schema(description = "An object representing a library")
 public class LibraryDTO {
-    @Schema(example = "3")
+    @Schema(example = "3", description = "asfafdasdfasd")
     private Long id;
 
-    @Schema(example = "LibraryTitle")
+    @Schema(example = "library_title")
     private String title;
 
-    @Schema(example = "LibraryTopic")
+    @Schema(example = "library_topic")
     private String topic;
 
     @Schema(example = "false")

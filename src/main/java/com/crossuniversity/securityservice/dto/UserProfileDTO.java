@@ -1,6 +1,5 @@
 package com.crossuniversity.securityservice.dto;
 
-import com.crossuniversity.securityservice.entity.Library;
 import com.crossuniversity.securityservice.entity.UniversityUser;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
@@ -8,7 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
 @Builder
@@ -24,11 +22,18 @@ public class UserProfileDTO {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private UniversityDTO university;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<LibraryDTO> ownLibraries;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<LibraryDTO> subscribedLibraries;
 
     public static UserProfileDTO parseEntityToDto(UniversityUser universityUser){
         UniversityDTO universityDTO = UniversityDTO.parseEntityToDto(universityUser.getUniversity());
         List<LibraryDTO> ownLibrariesDTO = universityUser.getOwnLibraries()
+                .stream().map(LibraryDTO::parseEntityToDto).toList();
+
+        List<LibraryDTO> subscribedLibrariesDTO = universityUser.getSubscribedLibraries()
                 .stream().map(LibraryDTO::parseEntityToDto).toList();
 
         return UserProfileDTO.builder()
@@ -38,6 +43,7 @@ public class UserProfileDTO {
                 .email(universityUser.getUserCredentials().getEmail())
                 .space(universityUser.getSpace())
                 .ownLibraries(ownLibrariesDTO)
+                .subscribedLibraries(subscribedLibrariesDTO)
                 .build();
     }
 }

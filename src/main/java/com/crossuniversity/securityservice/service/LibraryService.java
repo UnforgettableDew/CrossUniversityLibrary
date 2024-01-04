@@ -9,6 +9,7 @@ import com.crossuniversity.securityservice.entity.UniversityUser;
 import com.crossuniversity.securityservice.exception.DocumentNotFoundException;
 import com.crossuniversity.securityservice.exception.LibraryNotFoundException;
 import com.crossuniversity.securityservice.exception.UniversityNotFoundException;
+import com.crossuniversity.securityservice.exception.UserNotFoundException;
 import com.crossuniversity.securityservice.repository.DocumentRepository;
 import com.crossuniversity.securityservice.repository.LibraryRepository;
 import com.crossuniversity.securityservice.repository.UniversityRepository;
@@ -157,7 +158,7 @@ public class LibraryService {
         return LibraryDTO.parseEntityToDto(library);
     }
 
-    public List<LibraryDTO> subscribeOnLibrary(Long libraryId) {
+    public List<LibraryDTO> subscribeToLibrary(Long libraryId) {
         UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
         Library library = getLibraryById(libraryId);
 
@@ -188,7 +189,7 @@ public class LibraryService {
         if (checkLibraryOwnerAccess(libraryId, owner)) {
             Library library = getLibraryById(libraryId);
             UniversityUser universityUser = universityUserRepository.findUniversityUserByEmail(email)
-                    .orElseThrow(() -> new UniversityNotFoundException("University with email = " + email + " does not exist"));
+                    .orElseThrow(() -> new UserNotFoundException("User with email = " + email + " does not exist"));
 
             universityUser.removeSubscribedLibrary(library);
             universityUserRepository.save(universityUser);

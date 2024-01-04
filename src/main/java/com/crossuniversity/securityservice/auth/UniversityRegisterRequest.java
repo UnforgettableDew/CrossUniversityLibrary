@@ -1,4 +1,4 @@
-package com.crossuniversity.securityservice.model;
+package com.crossuniversity.securityservice.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

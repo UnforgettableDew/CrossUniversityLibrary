@@ -1,6 +1,7 @@
 package com.crossuniversity.securityservice.controller;
 
 import com.crossuniversity.securityservice.service.MailService;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/test")
+@Hidden
 public class TestController {
     private final MailService mailService;
 

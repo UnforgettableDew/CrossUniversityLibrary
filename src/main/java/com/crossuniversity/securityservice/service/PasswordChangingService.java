@@ -9,7 +9,7 @@ import org.springframework.expression.AccessException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import static com.crossuniversity.securityservice.utils.ConstantMessage.*;
+import static com.crossuniversity.securityservice.utils.MailMessage.*;
 
 @Service
 @Slf4j

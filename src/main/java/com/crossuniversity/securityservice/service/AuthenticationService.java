@@ -8,6 +8,7 @@ import com.crossuniversity.securityservice.entity.University;
 import com.crossuniversity.securityservice.entity.UniversityUser;
 import com.crossuniversity.securityservice.entity.UserCredentials;
 import com.crossuniversity.securityservice.entity.UserRole;
+import com.crossuniversity.securityservice.exception.UniversityNotFoundException;
 import com.crossuniversity.securityservice.exception.UserAlreadyExistsException;
 import com.crossuniversity.securityservice.repository.UniversityRepository;
 import com.crossuniversity.securityservice.repository.UniversityUserRepository;
@@ -15,7 +16,6 @@ import com.crossuniversity.securityservice.repository.UserCredentialsRepository;
 import com.crossuniversity.securityservice.repository.UserRoleRepository;
 import com.crossuniversity.securityservice.security.AppUserDetails;
 import com.crossuniversity.securityservice.security.JwtService;
-import com.crossuniversity.securityservice.utils.ConstantMessage;
 import com.crossuniversity.securityservice.utils.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.crossuniversity.securityservice.utils.ConstantMessage.*;
+import static com.crossuniversity.securityservice.utils.MailMessage.*;
 
 @Service
 @Slf4j
@@ -94,7 +94,7 @@ public class AuthenticationService {
             String refreshToken = jwtService.generateRefreshToken(securityUser);
 
             return new AuthenticationResponse(accessToken, refreshToken);
-        } else throw new IllegalArgumentException("University domain = " + domain + " does not exist");
+        } else throw new UniversityNotFoundException("University domain = " + domain + " does not exist");
     }
 
     public CredentialDTO registerTeacher(String email) {
@@ -112,7 +112,7 @@ public class AuthenticationService {
             mailService.sendEmail(email, RANDOM_PASSWORD_SUBJECT,
                     randomPasswordMessage(email, randomPassword, role));
             return new CredentialDTO(email, randomPassword);
-        } else throw new IllegalArgumentException("University domain = " + domain + " does not exist");
+        } else throw new UniversityNotFoundException("University domain = " + domain + " does not exist");
     }
 
     public CredentialDTO registerUniversityAdmin(String email) {
@@ -128,7 +128,7 @@ public class AuthenticationService {
             mailService.sendEmail(email, RANDOM_PASSWORD_SUBJECT,
                     randomPasswordMessage(email, randomPassword, role));
             return new CredentialDTO(email, randomPassword);
-        } else throw new IllegalArgumentException("University domain = " + domain + " does not exist");
+        } else throw new UniversityNotFoundException("University domain = " + domain + " does not exist");
     }
 
     private UserCredentials saveUser(String email,
