@@ -1,6 +1,5 @@
 package com.crossuniversity.securityservice.entity;
 
-import com.crossuniversity.securityservice.dto.LibraryDTO;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -51,14 +50,6 @@ public class Library {
     @ManyToOne(cascade = ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "university_id")
     private University university;
-
-//    public static Library parseDtoToEntity(LibraryDTO libraryDTO){
-//        return Library.builder()
-//                .title(libraryDTO.getTitle())
-//                .topic(libraryDTO.getTopic())
-//                .libraryAccess(libraryDTO.isLibraryAccess())
-//                .build();
-//    }
 
     public void addDocument(Document document){
         this.documents.add(document);

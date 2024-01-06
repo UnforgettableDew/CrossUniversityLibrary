@@ -32,7 +32,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -65,56 +64,14 @@ public class LibraryService {
         this.securityUtils = securityUtils;
     }
 
-    private Library getLibraryById(Long libraryId) {
-        return libraryRepository.findById(libraryId)
-                .orElseThrow(() -> new LibraryNotFoundException("Library with id = " + libraryId + " does not exist"));
-    }
-
-    private Document getDocumentById(Long documentId) {
-        return documentRepository.findById(documentId).orElseThrow(() ->
-                new DocumentNotFoundException("Document with id = " + documentId + " does not exist"));
-    }
-
-    private boolean checkLibraryOwnerAccess(Long libraryId, UniversityUser universityUser) {
-        boolean flag = false;
-        for (Library library : universityUser.getOwnLibraries()) {
-            if (library.getId().equals(libraryId))
-                return true;
-        }
-        return flag;
-    }
-
-    private boolean checkLibrarySubscriberAccess(Long libraryId, UniversityUser universityUser) {
-        for (Library library : universityUser.getSubscribedLibraries()) {
-            if (library.getId().equals(libraryId))
-                return true;
-        }
-        return false;
-    }
-
-    private boolean checkDocumentOwnerAccess(Long documentId, UniversityUser universityUser) {
-        for (Document document : universityUser.getDocuments()) {
-            if (document.getId().equals(documentId))
-                return true;
-        }
-        return false;
-    }
-
-
     public List<LibraryDTO> getOwnLibraries() {
         UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
-        return universityUser.getOwnLibraries()
-                .stream()
-                .map(libraryMapper::mapToDTO)
-                .collect(Collectors.toList());
+        return libraryMapper.mapToListDTO(universityUser.getOwnLibraries());
     }
 
     public List<LibraryDTO> getSubscribedLibraries() {
         UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
-        return universityUser.getSubscribedLibraries()
-                .stream()
-                .map(libraryMapper::mapToDTO)
-                .collect(Collectors.toList());
+        return libraryMapper.mapToListDTO(universityUser.getSubscribedLibraries());
     }
 
     public List<LibraryDTO> getUniversityLibraries(Long universityId) {
@@ -126,18 +83,12 @@ public class LibraryService {
 
     public List<UserBriefProfile> getOwnersList(Long libraryId) {
         Library library = getLibraryById(libraryId);
-        return library.getOwners()
-                .stream()
-                .map(briefProfileMapper::mapToDTO)
-                .collect(Collectors.toList());
+        return briefProfileMapper.mapToListDTO(library.getOwners());
     }
 
     public List<UserBriefProfile> getSubscribersList(Long libraryId) {
         Library library = getLibraryById(libraryId);
-        return library.getSubscribers()
-                .stream()
-                .map(briefProfileMapper::mapToDTO)
-                .collect(Collectors.toList());
+        return briefProfileMapper.mapToListDTO(library.getSubscribers());
     }
 
     public List<DocumentDTO> getDocumentsByLibraryId(Long libraryId) throws AccessException {
@@ -172,10 +123,7 @@ public class LibraryService {
 
         universityUser.addSubscribedLibrary(library);
         universityUserRepository.save(universityUser);
-        return universityUser.getSubscribedLibraries()
-                .stream()
-                .map(libraryMapper::mapToDTO)
-                .collect(Collectors.toList());
+        return libraryMapper.mapToListDTO(universityUser.getSubscribedLibraries());
     }
 
     public void subscribeUser(Long libraryId, String email) throws AccessException {
@@ -210,10 +158,7 @@ public class LibraryService {
 
         universityUser.removeSubscribedLibrary(library);
         universityUserRepository.save(universityUser);
-        return universityUser.getSubscribedLibraries()
-                .stream()
-                .map(libraryMapper::mapToDTO)
-                .collect(Collectors.toList());
+        return libraryMapper.mapToListDTO(universityUser.getSubscribedLibraries());
     }
 
     public Resource downloadDocument(Long documentId) throws MalformedURLException {
@@ -274,7 +219,7 @@ public class LibraryService {
         UniversityUser owner = securityUtils.getUserFromSecurityContextHolder();
 
         if (checkLibraryOwnerAccess(libraryId, owner)) {
-            int rows = libraryRepository.deleteLibrary(libraryId);
+            libraryRepository.deleteLibrary(libraryId);
             log.info("Delete from library table");
         } else throw new AccessException("Access restricted");
     }
@@ -315,7 +260,7 @@ public class LibraryService {
         } else throw new AccessException("Access forbidden");
     }
 
-    public void deleteDocument(Long documentId) throws AccessException, IOException {
+    public void deleteDocument(Long documentId) throws AccessException {
         UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
         if (checkDocumentOwnerAccess(documentId, universityUser)) {
             Document document = getDocumentById(documentId);
@@ -353,5 +298,40 @@ public class LibraryService {
             documentRepository.save(document);
             return documentMapper.mapToDTO(document);
         } else throw new AccessException("Access forbidden");
+    }
+
+    private Library getLibraryById(Long libraryId) {
+        return libraryRepository.findById(libraryId)
+                .orElseThrow(() -> new LibraryNotFoundException("Library with id = " + libraryId + " does not exist"));
+    }
+
+    private Document getDocumentById(Long documentId) {
+        return documentRepository.findById(documentId).orElseThrow(() ->
+                new DocumentNotFoundException("Document with id = " + documentId + " does not exist"));
+    }
+
+    private boolean checkLibraryOwnerAccess(Long libraryId, UniversityUser universityUser) {
+        boolean flag = false;
+        for (Library library : universityUser.getOwnLibraries()) {
+            if (library.getId().equals(libraryId))
+                return true;
+        }
+        return flag;
+    }
+
+    private boolean checkLibrarySubscriberAccess(Long libraryId, UniversityUser universityUser) {
+        for (Library library : universityUser.getSubscribedLibraries()) {
+            if (library.getId().equals(libraryId))
+                return true;
+        }
+        return false;
+    }
+
+    private boolean checkDocumentOwnerAccess(Long documentId, UniversityUser universityUser) {
+        for (Document document : universityUser.getDocuments()) {
+            if (document.getId().equals(documentId))
+                return true;
+        }
+        return false;
     }
 }

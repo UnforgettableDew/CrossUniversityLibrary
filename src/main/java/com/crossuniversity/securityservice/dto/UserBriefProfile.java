@@ -1,6 +1,5 @@
 package com.crossuniversity.securityservice.dto;
 
-import com.crossuniversity.securityservice.entity.UniversityUser;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
