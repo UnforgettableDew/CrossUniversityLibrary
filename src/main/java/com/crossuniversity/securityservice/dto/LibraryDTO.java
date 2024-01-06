@@ -1,12 +1,8 @@
 package com.crossuniversity.securityservice.dto;
 
-import com.crossuniversity.securityservice.entity.Library;
-import com.crossuniversity.securityservice.utils.SwaggerConstant;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -25,13 +21,4 @@ public class LibraryDTO {
 
     @Schema(example = "false")
     private boolean libraryAccess;
-
-    public static LibraryDTO parseEntityToDto(Library library){
-        return LibraryDTO.builder()
-                .id(library.getId())
-                .title(library.getTitle())
-                .topic(library.getTopic())
-                .libraryAccess(library.isLibraryAccess())
-                .build();
-    }
 }

@@ -31,22 +31,4 @@ public class UserProfileDTO {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<LibraryDTO> subscribedLibraries;
 
-    public static UserProfileDTO parseEntityToDto(UniversityUser universityUser){
-        UniversityDTO universityDTO = UniversityDTO.parseEntityToDto(universityUser.getUniversity());
-        List<LibraryDTO> ownLibrariesDTO = universityUser.getOwnLibraries()
-                .stream().map(LibraryDTO::parseEntityToDto).toList();
-
-        List<LibraryDTO> subscribedLibrariesDTO = universityUser.getSubscribedLibraries()
-                .stream().map(LibraryDTO::parseEntityToDto).toList();
-
-        return UserProfileDTO.builder()
-                .id(universityUser.getId())
-                .userName(universityUser.getUserName())
-                .university(universityDTO)
-                .email(universityUser.getUserCredentials().getEmail())
-                .space(universityUser.getSpace())
-                .ownLibraries(ownLibrariesDTO)
-                .subscribedLibraries(subscribedLibrariesDTO)
-                .build();
-    }
 }

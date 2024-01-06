@@ -43,7 +43,7 @@ public class SecurityConfig {
                             "/auth/**",
                             "/swagger-ui/**", "/v3/api-docs/**",
                             "/swagger-resources/**", "/test/**",
-                            "/library/university/{universityId}").permitAll()
+                            "/library/university/**").permitAll()
                 .requestMatchers("/library/create-teacher")
                     .hasAnyRole("TEACHER", "UNIVERSITY_ADMIN", "GLOBAL_ADMIN")
                 .requestMatchers("/user/**")

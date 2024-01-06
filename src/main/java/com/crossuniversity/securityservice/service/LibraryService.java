@@ -10,6 +10,9 @@ import com.crossuniversity.securityservice.exception.DocumentNotFoundException;
 import com.crossuniversity.securityservice.exception.LibraryNotFoundException;
 import com.crossuniversity.securityservice.exception.UniversityNotFoundException;
 import com.crossuniversity.securityservice.exception.UserNotFoundException;
+import com.crossuniversity.securityservice.mapper.BriefProfileMapper;
+import com.crossuniversity.securityservice.mapper.DocumentMapper;
+import com.crossuniversity.securityservice.mapper.LibraryMapper;
 import com.crossuniversity.securityservice.repository.DocumentRepository;
 import com.crossuniversity.securityservice.repository.LibraryRepository;
 import com.crossuniversity.securityservice.repository.UniversityRepository;
@@ -23,7 +26,6 @@ import org.springframework.expression.AccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
@@ -38,6 +40,9 @@ public class LibraryService {
     private final UniversityUserRepository universityUserRepository;
     private final UniversityRepository universityRepository;
     private final LibraryRepository libraryRepository;
+    private final LibraryMapper libraryMapper;
+    private final DocumentMapper documentMapper;
+    private final BriefProfileMapper briefProfileMapper;
     private final DocumentRepository documentRepository;
     private final SecurityUtils securityUtils;
 
@@ -45,11 +50,17 @@ public class LibraryService {
     public LibraryService(UniversityUserRepository universityUserRepository,
                           UniversityRepository universityRepository,
                           LibraryRepository libraryRepository,
+                          LibraryMapper libraryMapper,
+                          DocumentMapper documentMapper,
+                          BriefProfileMapper briefProfileMapper,
                           DocumentRepository documentRepository,
                           SecurityUtils securityUtils) {
         this.universityUserRepository = universityUserRepository;
         this.universityRepository = universityRepository;
         this.libraryRepository = libraryRepository;
+        this.libraryMapper = libraryMapper;
+        this.documentMapper = documentMapper;
+        this.briefProfileMapper = briefProfileMapper;
         this.documentRepository = documentRepository;
         this.securityUtils = securityUtils;
     }
@@ -94,7 +105,7 @@ public class LibraryService {
         UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
         return universityUser.getOwnLibraries()
                 .stream()
-                .map(LibraryDTO::parseEntityToDto)
+                .map(libraryMapper::mapToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -102,21 +113,22 @@ public class LibraryService {
         UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
         return universityUser.getSubscribedLibraries()
                 .stream()
-                .map(LibraryDTO::parseEntityToDto)
+                .map(libraryMapper::mapToDTO)
                 .collect(Collectors.toList());
     }
 
-    public List<Library> getUniversityLibraries(Long universityId) {
+    public List<LibraryDTO> getUniversityLibraries(Long universityId) {
         if (!universityRepository.existsById(universityId))
             throw new UniversityNotFoundException("University with id = " + universityId + " does not exist");
-        return libraryRepository.findLibrariesByUniversityIdAndLibraryAccess(universityId, true);
+        return libraryMapper.mapToListDTO(libraryRepository
+                .findLibrariesByUniversityIdAndLibraryAccess(universityId, true));
     }
 
     public List<UserBriefProfile> getOwnersList(Long libraryId) {
         Library library = getLibraryById(libraryId);
         return library.getOwners()
                 .stream()
-                .map(UserBriefProfile::parseEntityToDto)
+                .map(briefProfileMapper::mapToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -124,7 +136,7 @@ public class LibraryService {
         Library library = getLibraryById(libraryId);
         return library.getSubscribers()
                 .stream()
-                .map(UserBriefProfile::parseEntityToDto)
+                .map(briefProfileMapper::mapToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -135,28 +147,23 @@ public class LibraryService {
         if (!library.isLibraryAccess()) {
             if (checkLibraryOwnerAccess(libraryId, universityUser) ||
                     checkLibrarySubscriberAccess(libraryId, universityUser)) {
-                return library.getDocuments()
-                        .stream()
-                        .map(DocumentDTO::parseEntityToDto)
-                        .collect(Collectors.toList());
+                return documentMapper.mapListToDTO(library.getDocuments());
             }
-        } else return library.getDocuments()
-                .stream()
-                .map(DocumentDTO::parseEntityToDto)
-                .collect(Collectors.toList());
+        } else return documentMapper.mapListToDTO(library.getDocuments());
         throw new AccessException("Access forbidden");
     }
 
 
     public LibraryDTO createLibrary(LibraryDTO libraryDTO) {
         UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
-        Library library = Library.parseDtoToEntity(libraryDTO);
+        Library library = libraryMapper.mapToEntity(libraryDTO);
+
         library.setUniversity(universityUser.getUniversity());
         libraryRepository.save(library);
 
         universityUser.addOwnLibrary(library);
         universityUserRepository.save(universityUser);
-        return LibraryDTO.parseEntityToDto(library);
+        return libraryMapper.mapToDTO(library);
     }
 
     public List<LibraryDTO> subscribeToLibrary(Long libraryId) {
@@ -167,7 +174,7 @@ public class LibraryService {
         universityUserRepository.save(universityUser);
         return universityUser.getSubscribedLibraries()
                 .stream()
-                .map(LibraryDTO::parseEntityToDto)
+                .map(libraryMapper::mapToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -177,7 +184,7 @@ public class LibraryService {
         if (checkLibraryOwnerAccess(libraryId, owner)) {
             Library library = getLibraryById(libraryId);
             UniversityUser universityUser = universityUserRepository.findUniversityUserByEmail(email)
-                    .orElseThrow(() -> new UniversityNotFoundException("University with email = " + email + " does not exist"));
+                    .orElseThrow(() -> new UserNotFoundException("User with email = " + email + " not found"));
 
             universityUser.addSubscribedLibrary(library);
             universityUserRepository.save(universityUser);
@@ -190,7 +197,7 @@ public class LibraryService {
         if (checkLibraryOwnerAccess(libraryId, owner)) {
             Library library = getLibraryById(libraryId);
             UniversityUser universityUser = universityUserRepository.findUniversityUserByEmail(email)
-                    .orElseThrow(() -> new UserNotFoundException("User with email = " + email + " does not exist"));
+                    .orElseThrow(() -> new UserNotFoundException("User with email = " + email + " not found"));
 
             universityUser.removeSubscribedLibrary(library);
             universityUserRepository.save(universityUser);
@@ -205,7 +212,7 @@ public class LibraryService {
         universityUserRepository.save(universityUser);
         return universityUser.getSubscribedLibraries()
                 .stream()
-                .map(LibraryDTO::parseEntityToDto)
+                .map(libraryMapper::mapToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -230,7 +237,7 @@ public class LibraryService {
                     .topic(topic)
                     .description(description)
                     .filePath(path + file.getOriginalFilename())
-                    .fileSize(file.getSize()/1_000_000.0)
+                    .fileSize(file.getSize() / 1_000_000.0)
                     .libraries(new ArrayList<>())
                     .owner(universityUser)
                     .build();
@@ -243,22 +250,23 @@ public class LibraryService {
             Path filePath = Paths.get(path, file.getOriginalFilename());
             file.transferTo(filePath.toFile());
 
-            return DocumentDTO.parseEntityToDto(document);
+            return documentMapper.mapToDTO(document);
         } else throw new AccessException("Access restricted");
     }
 
     public LibraryDTO updateLibrary(LibraryDTO libraryDTO) throws AccessException {
-        Long libraryId = libraryDTO.getId();
         UniversityUser owner = securityUtils.getUserFromSecurityContextHolder();
+
+        Long libraryId = libraryDTO.getId();
 
         if (checkLibraryOwnerAccess(libraryId, owner)) {
             Library library = getLibraryById(libraryId);
 
-            library.setTitle(libraryDTO.getTitle());
-            library.setTopic(libraryDTO.getTopic());
-            library.setLibraryAccess(libraryDTO.isLibraryAccess());
+            Library updatedLibrary = libraryMapper.updateEntity(libraryDTO, library);
 
-            return LibraryDTO.parseEntityToDto(libraryRepository.save(library));
+            libraryRepository.save(updatedLibrary);
+
+            return libraryMapper.mapToDTO(updatedLibrary);
         } else throw new AccessException("Access restricted");
     }
 
@@ -271,29 +279,29 @@ public class LibraryService {
         } else throw new AccessException("Access restricted");
     }
 
-    public List<Library> findLibrariesBy(Long universityId, String title, String topic, String ownerEmail) {
+    public List<LibraryDTO> findLibrariesBy(Long universityId, String title, String topic, String ownerEmail) {
         if (title == null && topic == null && ownerEmail == null)
             return getUniversityLibraries(universityId);
 
         if (topic == null && ownerEmail == null)
-            return libraryRepository.findLibrariesByTitle(title);
+            return libraryMapper.mapToListDTO(libraryRepository.findLibrariesByTitle(title));
 
         if (title == null && ownerEmail == null)
-            return libraryRepository.findLibrariesByTopic(topic);
+            return libraryMapper.mapToListDTO(libraryRepository.findLibrariesByTopic(topic));
 
         if (title == null && topic == null)
-            return libraryRepository.findLibrariesByOwner(ownerEmail);
+            return libraryMapper.mapToListDTO(libraryRepository.findLibrariesByOwner(ownerEmail));
 
         if (title == null)
-            return libraryRepository.findLibrariesByTopicAndOwner(topic, ownerEmail);
+            return libraryMapper.mapToListDTO(libraryRepository.findLibrariesByTopicAndOwner(topic, ownerEmail));
 
         if (topic == null)
-            return libraryRepository.findLibrariesByTitleAndOwner(title, ownerEmail);
+            return libraryMapper.mapToListDTO(libraryRepository.findLibrariesByTitleAndOwner(title, ownerEmail));
 
         if (ownerEmail == null)
-            return libraryRepository.findLibrariesByTitleAndTopic(title, topic);
+            return libraryMapper.mapToListDTO(libraryRepository.findLibrariesByTitleAndTopic(title, topic));
 
-        return libraryRepository.findLibrariesByTitleAndTopicAndOwner(title, topic, ownerEmail);
+        return libraryMapper.mapToListDTO(libraryRepository.findLibrariesByTitleAndTopicAndOwner(title, topic, ownerEmail));
     }
 
     public void addExistedDocumentToLibrary(Long libraryId, Long documentId) throws AccessException {
@@ -328,7 +336,7 @@ public class LibraryService {
             libraryRepository.save(library);
 
             List<Library> libraries = document.getLibraries();
-            if(libraries.isEmpty())
+            if (libraries.isEmpty())
                 documentRepository.deleteDocumentById(documentId);
         } else throw new AccessException("Access forbidden");
     }
@@ -343,7 +351,7 @@ public class LibraryService {
             document.setDescription(documentDTO.getDescription());
 
             documentRepository.save(document);
-            return DocumentDTO.parseEntityToDto(document);
+            return documentMapper.mapToDTO(document);
         } else throw new AccessException("Access forbidden");
     }
 }

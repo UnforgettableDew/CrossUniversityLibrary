@@ -15,7 +15,9 @@ import java.util.List;
 
 @Configuration
 @OpenAPIDefinition(
-        servers = {@io.swagger.v3.oas.annotations.servers.Server(url = "http://25.59.220.248:8080", description = "Hamachi Server URL")
+        servers = {
+                @io.swagger.v3.oas.annotations.servers.Server(url = "http://25.59.220.248:8080", description = "Hamachi Server URL"),
+                @io.swagger.v3.oas.annotations.servers.Server(url = "http://localhost:8080", description = "Localhost Server URL")
         }
 )
 public class SwaggerConfig {
@@ -40,8 +42,7 @@ public class SwaggerConfig {
                         .version("1.0.0")
                         .contact(new Contact()
                                 .email("SagittariusDew@gmail.com")
-                                .name("Andrew")))
-                .servers(List.of(new Server().url("http://localhost:8080")));
+                                .name("Andrew")));
     }
 
 }

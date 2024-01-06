@@ -143,10 +143,7 @@ public class LibraryController {
     public ResponseEntity<List<LibraryDTO>> getUniversityLibraries(
             @Parameter(description = "ID of the university to retrieve libraries for")
             @PathVariable Long universityId) {
-        return new ResponseEntity<>(libraryService.getUniversityLibraries(universityId)
-                .stream()
-                .map(LibraryDTO::parseEntityToDto)
-                .collect(Collectors.toList()), HttpStatus.OK);
+        return new ResponseEntity<>(libraryService.getUniversityLibraries(universityId), HttpStatus.OK);
     }
 
     @Operation(
@@ -319,7 +316,7 @@ public class LibraryController {
             }
     )
     @GetMapping("/university/{universityId}/findBy")
-    public ResponseEntity<List<LibraryDTO>> findByTopic(
+    public ResponseEntity<List<LibraryDTO>> findLibrariesBy(
             @Parameter(description = "ID of the university for which libraries are searched.")
             @PathVariable Long universityId,
             @Parameter(description = "Filter libraries by title")
@@ -328,10 +325,7 @@ public class LibraryController {
             @RequestParam(required = false) String topic,
             @Parameter(description = "Filter libraries by owner email")
             @RequestParam(required = false) String ownerEmail) {
-        return new ResponseEntity<>(libraryService.findLibrariesBy(universityId, title, topic, ownerEmail)
-                .stream()
-                .map(LibraryDTO::parseEntityToDto)
-                .collect(Collectors.toList()), HttpStatus.OK);
+        return new ResponseEntity<>(libraryService.findLibrariesBy(universityId, title, topic, ownerEmail), HttpStatus.OK);
     }
 
     @Operation(
@@ -844,6 +838,7 @@ public class LibraryController {
             @RequestBody LibraryDTO libraryDTO) throws AccessException {
         return new ResponseEntity<>(libraryService.updateLibrary(libraryDTO), HttpStatus.OK);
     }
+
 
     @Operation(
             summary = "Update document information",

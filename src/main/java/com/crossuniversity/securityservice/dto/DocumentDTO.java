@@ -21,13 +21,4 @@ public class DocumentDTO {
 
     private UserBriefProfile owner;
 
-    public static DocumentDTO parseEntityToDto(Document document){
-        return DocumentDTO.builder()
-                .id(document.getId())
-                .title(document.getTitle())
-                .topic(document.getTopic())
-                .description(document.getDescription())
-                .owner(UserBriefProfile.parseEntityToDto(document.getOwner()))
-                .build();
-    }
 }

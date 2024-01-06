@@ -52,13 +52,13 @@ public class Library {
     @JoinColumn(name = "university_id")
     private University university;
 
-    public static Library parseDtoToEntity(LibraryDTO libraryDTO){
-        return Library.builder()
-                .title(libraryDTO.getTitle())
-                .topic(libraryDTO.getTopic())
-                .libraryAccess(libraryDTO.isLibraryAccess())
-                .build();
-    }
+//    public static Library parseDtoToEntity(LibraryDTO libraryDTO){
+//        return Library.builder()
+//                .title(libraryDTO.getTitle())
+//                .topic(libraryDTO.getTopic())
+//                .libraryAccess(libraryDTO.isLibraryAccess())
+//                .build();
+//    }
 
     public void addDocument(Document document){
         this.documents.add(document);

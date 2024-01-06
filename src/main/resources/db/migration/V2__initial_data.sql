@@ -26,8 +26,10 @@ values ('student1_name', 1000, 1, 1),
 
 insert into library (title, topic, library_access, university_id)
 values ('Teacher1_library1', 'Science', true, 1),
-       ('Teacher1_library2', 'Math', false, 1),
-       ('Student1_library1', 'History', false, 1);
+       ('Teacher1_library3', 'Math', false, 1),
+       ('Student1_library1', 'History', false, 1),
+       ('Random_library', 'History', false, 2),
+       ('Teacher1_library2', 'History', true, 1);
 
 insert into documents (title, topic, description, file_path, file_size, owner_id)
 values ('Document 1', 'Science', 'Description for Document 1', '/path/to/document1.pdf', 1.4, 1),
@@ -49,7 +51,8 @@ values (1, 1),
 insert into user_library_owners (user_id, library_id)
 values (2, 1),
        (2, 2),
-       (1, 3);
+       (1, 3),
+       (2, 5);
 
 insert into user_library_subscribers (user_id, library_id)
 values (1, 2),
