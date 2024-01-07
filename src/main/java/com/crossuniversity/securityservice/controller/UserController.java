@@ -15,9 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static com.crossuniversity.securityservice.utils.ResponseCode.*;
-import static com.crossuniversity.securityservice.utils.SwaggerConstant.*;
-import static com.crossuniversity.securityservice.utils.SwaggerConstant.NOT_FOUND_EXCEPTION;
+import static com.crossuniversity.securityservice.constant.ResponseCode.*;
+import static com.crossuniversity.securityservice.constant.SwaggerConstant.*;
+import static com.crossuniversity.securityservice.constant.SwaggerConstant.NOT_FOUND_EXCEPTION;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
@@ -73,9 +73,9 @@ public class UserController {
                     )
             }
     )
-    @GetMapping("/my-profile")
-    public ResponseEntity<UserProfileDTO> myProfile() {
-        return new ResponseEntity<>(userService.myProfile(), HttpStatus.OK);
+    @GetMapping("/profile")
+    public ResponseEntity<UserProfileDTO> profile() {
+        return new ResponseEntity<>(userService.profile(), HttpStatus.OK);
     }
 
     @Operation(
@@ -158,7 +158,7 @@ public class UserController {
     @PostMapping("/confirm-old-password")
     public ResponseEntity<?> confirmOldPassword(
             @Parameter(description = "Current password to be confirmed")
-            @RequestParam String confirmedPassword) throws AccessException {
+            @RequestParam String confirmedPassword) {
         passwordChangingService.confirmOldPassword(confirmedPassword);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -241,4 +241,5 @@ public class UserController {
             @RequestParam String userName) {
         return new ResponseEntity<>(userService.updateProfile(userName), HttpStatus.OK);
     }
+
 }

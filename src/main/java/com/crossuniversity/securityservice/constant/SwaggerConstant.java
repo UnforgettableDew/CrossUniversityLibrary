@@ -1,4 +1,4 @@
-package com.crossuniversity.securityservice.utils;
+package com.crossuniversity.securityservice.constant;
 
 public class SwaggerConstant {
 
@@ -69,23 +69,6 @@ public class SwaggerConstant {
                       "path": "http://exception/example/path"
                     }""";
 
-    public static final String LIBRARY_TEACHER_EXAMPLE =
-            """
-                    {
-                      "title": "library1_title",
-                      "topic": "History",
-                      "libraryAccess": false
-                    }
-                    """;
-
-    public static final String LIBRARY_STUDENT_EXAMPLE =
-            """
-                    {
-                      "title": "library1_title",
-                      "topic": "History"
-                    }
-                    """;
-
     public static final String LIBRARY_EXAMPLE =
             """
                     {
@@ -94,7 +77,6 @@ public class SwaggerConstant {
                           "topic": "History",
                           "libraryAccess": false
                         }""";
-
 
     public static final String DOCUMENT_EXAMPLE =
             """
@@ -109,13 +91,6 @@ public class SwaggerConstant {
                           "email": "student1kpi@kpi.ua"
                         }
                       }""";
-
-    public static final String UNIVERSITY_REQUEST_EXAMPLE =
-            """
-                    {
-                      "title": "title_example",
-                      "domain": "domain.example"
-                    }""";
 
     public static final String UNIVERSITY_FULL_EXAMPLE =
             """
@@ -133,6 +108,7 @@ public class SwaggerConstant {
                         "topic": "Math Science",
                         "description": "Description for Document 4"
                       }""";
+
     public static final String LIBRARY_LIST_EXAMPLE =
             """
                     {

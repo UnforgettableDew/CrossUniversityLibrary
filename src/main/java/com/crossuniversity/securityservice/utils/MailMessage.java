@@ -1,8 +1,8 @@
 package com.crossuniversity.securityservice.utils;
 
 public class MailMessage {
-    public static String PASSWORD_CHANGE_SUBJECT = "CrossUniversityLibrary: Password Reset Request";
-    public static String RANDOM_PASSWORD_SUBJECT = "CrossUniversityLibrary: Account Registration";
+    public static final String PASSWORD_CHANGE_SUBJECT = "CrossUniversityLibrary: Password Reset Request";
+    public static final String RANDOM_PASSWORD_SUBJECT = "CrossUniversityLibrary: Account Registration";
 
     public static String passwordChangeMessage(String username, String secretCode) {
         return String.format("Dear %s,%n%n" +

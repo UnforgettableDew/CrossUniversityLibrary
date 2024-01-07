@@ -1,4 +1,4 @@
-package com.crossuniversity.securityservice.utils;
+package com.crossuniversity.securityservice.constant;
 
 public class ResponseCode {
     public static final String OK = "200";

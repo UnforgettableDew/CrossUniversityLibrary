@@ -2,6 +2,7 @@ package com.crossuniversity.securityservice.service;
 
 import com.crossuniversity.securityservice.dto.UserProfileDTO;
 import com.crossuniversity.securityservice.entity.UniversityUser;
+import com.crossuniversity.securityservice.exception.not_found.UserNotFoundException;
 import com.crossuniversity.securityservice.mapper.UserProfileMapper;
 import com.crossuniversity.securityservice.repository.UniversityUserRepository;
 import com.crossuniversity.securityservice.utils.SecurityUtils;
@@ -31,11 +32,12 @@ public class UserService {
     }
 
     public UserProfileDTO getUserProfileByEmail(String email) {
-        UniversityUser universityUser = universityUserRepository.findUniversityUserByEmail(email).orElseThrow();
+        UniversityUser universityUser = universityUserRepository.findUniversityUserByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User with email = '" + email + "' not found"));
         return userProfileMapper.mapToDTO(universityUser);
     }
 
-    public UserProfileDTO myProfile(){
+    public UserProfileDTO profile() {
         UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
         return getUserProfileByEmail(universityUser.getUserCredentials().getEmail());
     }

@@ -17,9 +17,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
@@ -35,16 +32,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.jwtService = jwtService;
     }
 
-    @Override
-    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) throws ServletException {
-        String servletPath = request.getServletPath();
-        return servletPath.contains("/auth");
-    }
+//    @Override
+//    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) throws ServletException {
+//        String servletPath = request.getServletPath();
+//        return servletPath.contains("/auth/authenticate")
+//                || servletPath.contains("/auth/student-registration");
+//    }
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
-                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
+                                    @NonNull FilterChain filterChain) throws IOException {
 
         try {
             String token = request.getHeader(HttpHeaders.AUTHORIZATION);

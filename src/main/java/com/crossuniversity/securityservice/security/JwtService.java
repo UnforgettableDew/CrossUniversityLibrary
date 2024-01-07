@@ -1,7 +1,7 @@
 package com.crossuniversity.securityservice.security;
 
 import com.crossuniversity.securityservice.entity.UserCredentials;
-import com.crossuniversity.securityservice.exception.UserNotFoundException;
+import com.crossuniversity.securityservice.exception.not_found.UserNotFoundException;
 import com.crossuniversity.securityservice.repository.UserCredentialsRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -100,6 +100,6 @@ public class JwtService {
         String jwtToken = request.getHeader(HttpHeaders.AUTHORIZATION).substring(7);
         String email = extractEmail(jwtToken);
         return userCredentialsRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User with email=" + email + " not found"));
+                .orElseThrow(() -> new UserNotFoundException("User with email = '" + email + "' not found"));
     }
 }

@@ -7,17 +7,15 @@ import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
-import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.List;
 
 @Configuration
 @OpenAPIDefinition(
         servers = {
-                @io.swagger.v3.oas.annotations.servers.Server(url = "http://25.59.220.248:8080", description = "Hamachi Server URL"),
-                @io.swagger.v3.oas.annotations.servers.Server(url = "http://localhost:8080", description = "Localhost Server URL")
+                @io.swagger.v3.oas.annotations.servers.Server(url = "http://localhost:8080", description = "Localhost Server URL"),
+                @io.swagger.v3.oas.annotations.servers.Server(url = "http://25.59.220.248:8080", description = "Hamachi Server URL")
         }
 )
 public class SwaggerConfig {

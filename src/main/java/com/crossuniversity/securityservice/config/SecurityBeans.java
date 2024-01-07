@@ -1,9 +1,8 @@
 package com.crossuniversity.securityservice.config;
 
-import com.crossuniversity.securityservice.exception.UserNotFoundException;
+import com.crossuniversity.securityservice.exception.not_found.UserNotFoundException;
 import com.crossuniversity.securityservice.repository.UserCredentialsRepository;
 import com.crossuniversity.securityservice.security.AppUserDetails;
-import com.crossuniversity.securityservice.security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,6 +1,6 @@
 package com.crossuniversity.securityservice.entity;
 
-import com.crossuniversity.securityservice.exception.OutOfSpaceException;
+import com.crossuniversity.securityservice.exception.bad_request.OutOfSpaceException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;

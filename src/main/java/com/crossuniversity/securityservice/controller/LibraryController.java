@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
-import org.springframework.expression.AccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,14 +21,20 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static com.crossuniversity.securityservice.utils.ResponseCode.*;
-import static com.crossuniversity.securityservice.utils.SwaggerConstant.*;
+import static com.crossuniversity.securityservice.constant.ResponseCode.*;
+import static com.crossuniversity.securityservice.constant.SwaggerConstant.*;
 import static org.springframework.http.MediaType.*;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 
 @RestController
 @RequestMapping("/library")
+@CrossOrigin(origins = "*",
+        allowedHeaders = "*",
+        exposedHeaders = "*",
+        methods = {GET, POST, PUT, DELETE},
+        maxAge = 3600)
 @Tag(name = "Library Controller")
 public class LibraryController {
     private final LibraryService libraryService;
@@ -72,7 +77,7 @@ public class LibraryController {
                     )
             }
     )
-    @GetMapping("/my")
+    @GetMapping("/own")
     public ResponseEntity<List<LibraryDTO>> getOwnLibraries() {
         return new ResponseEntity<>(libraryService.getOwnLibraries(), HttpStatus.OK);
     }
@@ -286,7 +291,7 @@ public class LibraryController {
     @GetMapping("/{libraryId}/documents")
     private ResponseEntity<List<DocumentDTO>> getDocumentsByLibraryId(
             @Parameter(description = "ID of the library to retrieve documents for")
-            @PathVariable Long libraryId) throws AccessException {
+            @PathVariable Long libraryId) {
         return new ResponseEntity<>(libraryService.getDocumentsByLibraryId(libraryId), HttpStatus.OK);
     }
 
@@ -378,12 +383,11 @@ public class LibraryController {
     }
 
     @Operation(
-            summary = "Create a library for a teacher",
-            description = "This API endpoint is designed for authenticated users with the role of a teacher or higher," +
-                    " ensuring that users with the role of a student cannot access it. Users with the role of a teacher" +
-                    " or higher can utilize this endpoint to create a new library with the option of open or restricted " +
-                    "access. The response includes relevant details about the created library, presented in the form of " +
-                    "LibraryDTO (Data Transfer Object) instances.",
+            summary = "Create a library with specified access settings",
+            description = "This API endpoint allows authenticated users with the role of teacher or higher to create " +
+                    "a library with specific access settings. The method accepts parameters for the library's title, " +
+                    "topic, and access (open or closed). Upon successful execution, it returns a ResponseEntity " +
+                    "containing the created LibraryDTO and an HTTP status code of 201 (CREATED).",
             responses = {
                     @ApiResponse(
                             responseCode = CREATED,
@@ -411,17 +415,19 @@ public class LibraryController {
                     )
             }
     )
-    @PostMapping("/create-teacher")
-    public ResponseEntity<LibraryDTO> createTeacherLibrary(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-                    examples = @ExampleObject(value = LIBRARY_TEACHER_EXAMPLE)
-            ))
-            @RequestBody LibraryDTO libraryDTO) {
-        return new ResponseEntity<>(libraryService.createLibrary(libraryDTO), HttpStatus.CREATED);
+    @PostMapping("/create-with-access")
+    public ResponseEntity<LibraryDTO> createLibraryWithAccess(
+            @Parameter(description = "The title of the library")
+            @RequestParam String title,
+            @Parameter(description = "The topic of the library")
+            @RequestParam String topic,
+            @Parameter(description = "The access setting for the library (true for open, false for closed)")
+            @RequestParam Boolean libraryAccess) {
+        return new ResponseEntity<>(libraryService.createLibrary(title, topic, libraryAccess), HttpStatus.CREATED);
     }
 
     @Operation(
-            summary = "Create a library for a student",
+            summary = "Create a library with default closed access",
             description = "This API endpoint is accessible to authenticated users, allowing them to create a new library " +
                     "specifically for students. Libraries created by students always have restricted access. The response " +
                     "includes relevant details about the created library, " +
@@ -453,14 +459,13 @@ public class LibraryController {
                     )
             }
     )
-    @PostMapping("/create-student")
-    public ResponseEntity<LibraryDTO> createStudentLibrary(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-                    examples = @ExampleObject(value = LIBRARY_STUDENT_EXAMPLE)
-            ))
-            @RequestBody LibraryDTO libraryDTO) {
-        libraryDTO.setLibraryAccess(false);
-        return new ResponseEntity<>(libraryService.createLibrary(libraryDTO), HttpStatus.CREATED);
+    @PostMapping("/create")
+    public ResponseEntity<LibraryDTO> createLibrary(
+            @Parameter(description = "The title of the library")
+            @RequestParam String title,
+            @Parameter(description = "The topic of the library")
+            @RequestParam String topic) {
+        return new ResponseEntity<>(libraryService.createLibrary(title, topic, false), HttpStatus.CREATED);
     }
 
     @Operation(
@@ -515,7 +520,7 @@ public class LibraryController {
             @Parameter(description = "The description of the document")
             @RequestParam String description,
             @Parameter(description = "ID of the library to which the document will be uploaded")
-            @PathVariable Long libraryId) throws IOException, AccessException {
+            @PathVariable Long libraryId) throws IOException {
 
         return new ResponseEntity<>(libraryService
                 .uploadDocument(file, title, topic, description, libraryId), HttpStatus.CREATED);
@@ -545,6 +550,14 @@ public class LibraryController {
                             )
                     ),
                     @ApiResponse(
+                            responseCode = BAD_REQUEST,
+                            description = BAD_REQUEST_DESCRIPTION,
+                            content = @Content(
+                                    mediaType = APPLICATION_JSON_VALUE,
+                                    examples = @ExampleObject(value = BAD_REQUEST_EXCEPTION)
+                            )
+                    ),
+                    @ApiResponse(
                             responseCode = NOT_FOUND,
                             description = NOT_FOUND_DESCRIPTION,
                             content = @Content(
@@ -571,6 +584,14 @@ public class LibraryController {
                     @ApiResponse(
                             responseCode = NO_CONTENT,
                             description = NO_CONTENT_DESCRIPTION
+                    ),
+                    @ApiResponse(
+                            responseCode = BAD_REQUEST,
+                            description = BAD_REQUEST_DESCRIPTION,
+                            content = @Content(
+                                    mediaType = APPLICATION_JSON_VALUE,
+                                    examples = @ExampleObject(value = BAD_REQUEST_EXCEPTION)
+                            )
                     ),
                     @ApiResponse(
                             responseCode = UNAUTHORIZED,
@@ -603,7 +624,7 @@ public class LibraryController {
             @Parameter(description = "ID of the library to which the user wants to subscribe another user")
             @PathVariable Long libraryId,
             @Parameter(description = "The email of the user to be subscribed")
-            @PathVariable String email) throws AccessException {
+            @PathVariable String email) {
         libraryService.subscribeUser(libraryId, email);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -650,7 +671,7 @@ public class LibraryController {
             @Parameter(description = "ID of the library from which the user wants to unsubscribe another user")
             @PathVariable Long libraryId,
             @Parameter(description = "The email of the user to be unsubscribed")
-            @PathVariable String email) throws AccessException {
+            @PathVariable String email) {
         libraryService.unsubscribeUser(libraryId, email);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -737,7 +758,7 @@ public class LibraryController {
             @Parameter(description = "ID of the library to which the user wants to add an existing document")
             @PathVariable Long libraryId,
             @Parameter(description = "ID of the existing document to be added")
-            @PathVariable Long documentId) throws AccessException {
+            @PathVariable Long documentId) {
         libraryService.addExistedDocumentToLibrary(libraryId, documentId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -784,7 +805,7 @@ public class LibraryController {
             @Parameter(description = "ID of the library from which the user wants to remove an existing document")
             @PathVariable Long libraryId,
             @Parameter(description = "ID of the existing document to be removed")
-            @PathVariable Long documentId) throws AccessException {
+            @PathVariable Long documentId) {
         libraryService.removeExistedDocumentFromLibrary(libraryId, documentId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -835,7 +856,7 @@ public class LibraryController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
                     examples = @ExampleObject(value = LIBRARY_EXAMPLE)
             ))
-            @RequestBody LibraryDTO libraryDTO) throws AccessException {
+            @RequestBody LibraryDTO libraryDTO) {
         return new ResponseEntity<>(libraryService.updateLibrary(libraryDTO), HttpStatus.OK);
     }
 
@@ -886,7 +907,7 @@ public class LibraryController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
                     examples = @ExampleObject(value = DOCUMENT_UPDATE_EXAMPLE)
             ))
-            @RequestBody DocumentDTO documentDTO) throws AccessException {
+            @RequestBody DocumentDTO documentDTO) {
         return new ResponseEntity<>(libraryService.updateDocument(documentDTO), HttpStatus.OK);
     }
 
@@ -929,7 +950,7 @@ public class LibraryController {
     @DeleteMapping("/{libraryId}/delete")
     public ResponseEntity<?> deleteLibrary(
             @Parameter(description = "ID of the library to be deleted")
-            @PathVariable Long libraryId) throws AccessException {
+            @PathVariable Long libraryId) {
         libraryService.deleteLibrary(libraryId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -973,7 +994,7 @@ public class LibraryController {
     @DeleteMapping("/document/{documentId}/delete")
     public ResponseEntity<?> deleteDocument(
             @Parameter(description = "ID of the document to be deleted")
-            @PathVariable Long documentId) throws AccessException, IOException {
+            @PathVariable Long documentId) {
         libraryService.deleteDocument(documentId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

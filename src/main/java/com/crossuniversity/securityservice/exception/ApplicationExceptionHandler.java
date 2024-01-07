@@ -1,8 +1,14 @@
 package com.crossuniversity.securityservice.exception;
 
+import com.crossuniversity.securityservice.exception.bad_request.*;
+import com.crossuniversity.securityservice.exception.forbidden.LibraryAccessException;
+import com.crossuniversity.securityservice.exception.forbidden.DocumentAccessException;
+import com.crossuniversity.securityservice.exception.not_found.DocumentNotFoundException;
+import com.crossuniversity.securityservice.exception.not_found.LibraryNotFoundException;
+import com.crossuniversity.securityservice.exception.not_found.UniversityNotFoundException;
+import com.crossuniversity.securityservice.exception.not_found.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.expression.AccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
@@ -21,8 +27,8 @@ public class ApplicationExceptionHandler {
             DocumentNotFoundException.class,
             LibraryNotFoundException.class,
             UniversityNotFoundException.class})
-    public ResponseEntity<ExceptionResponse> handleUsernameNotFoundException(Exception exception,
-                                                                             HttpServletRequest request) {
+    public ResponseEntity<ExceptionResponse> handleNotFoundException(Exception exception,
+                                                                     HttpServletRequest request) {
         HttpStatus httpStatus = NOT_FOUND;
         log.error(exception.getMessage());
 
@@ -38,10 +44,14 @@ public class ApplicationExceptionHandler {
 
     @org.springframework.web.bind.annotation.ExceptionHandler(value = {
             UserAlreadyExistsException.class,
+            UniversityAlreadyExistsException.class,
+            LibraryBadRequestException.class,
+            DocumentBadRequestException.class,
             AuthenticationException.class,
+            NotMatchException.class,
             OutOfSpaceException.class})
-    public ResponseEntity<ExceptionResponse> handleUsernameAlreadyExistsException(Exception exception,
-                                                                                  HttpServletRequest request) {
+    public ResponseEntity<ExceptionResponse> handleBadRequestException(Exception exception,
+                                                                       HttpServletRequest request) {
         HttpStatus httpStatus = BAD_REQUEST;
         log.error(exception.getMessage());
 
@@ -55,11 +65,13 @@ public class ApplicationExceptionHandler {
         return new ResponseEntity<>(response, httpStatus);
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value = {AccessException.class})
-    public ResponseEntity<ExceptionResponse> handleAccessException(AccessException exception,
+    @org.springframework.web.bind.annotation.ExceptionHandler(value = {
+            LibraryAccessException.class,
+            DocumentAccessException.class})
+    public ResponseEntity<ExceptionResponse> handleAccessException(Exception exception,
                                                                    HttpServletRequest request) {
         HttpStatus httpStatus = FORBIDDEN;
-        log.error(AccessException.class.getName() + ": " + exception.getMessage());
+        log.error(exception.getMessage());
 
         ExceptionResponse response = ExceptionResponse.builder()
                 .message(exception.getMessage())

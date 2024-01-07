@@ -1,7 +1,7 @@
 package com.crossuniversity.securityservice.utils;
 
 import com.crossuniversity.securityservice.entity.UniversityUser;
-import com.crossuniversity.securityservice.exception.UserNotFoundException;
+import com.crossuniversity.securityservice.exception.not_found.UserNotFoundException;
 import com.crossuniversity.securityservice.repository.UniversityUserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -6,10 +6,14 @@ import com.crossuniversity.securityservice.dto.UserBriefProfile;
 import com.crossuniversity.securityservice.entity.Document;
 import com.crossuniversity.securityservice.entity.Library;
 import com.crossuniversity.securityservice.entity.UniversityUser;
-import com.crossuniversity.securityservice.exception.DocumentNotFoundException;
-import com.crossuniversity.securityservice.exception.LibraryNotFoundException;
-import com.crossuniversity.securityservice.exception.UniversityNotFoundException;
-import com.crossuniversity.securityservice.exception.UserNotFoundException;
+import com.crossuniversity.securityservice.exception.forbidden.LibraryAccessException;
+import com.crossuniversity.securityservice.exception.bad_request.LibraryBadRequestException;
+import com.crossuniversity.securityservice.exception.forbidden.DocumentAccessException;
+import com.crossuniversity.securityservice.exception.bad_request.DocumentBadRequestException;
+import com.crossuniversity.securityservice.exception.not_found.DocumentNotFoundException;
+import com.crossuniversity.securityservice.exception.not_found.LibraryNotFoundException;
+import com.crossuniversity.securityservice.exception.not_found.UniversityNotFoundException;
+import com.crossuniversity.securityservice.exception.not_found.UserNotFoundException;
 import com.crossuniversity.securityservice.mapper.BriefProfileMapper;
 import com.crossuniversity.securityservice.mapper.DocumentMapper;
 import com.crossuniversity.securityservice.mapper.LibraryMapper;
@@ -22,7 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.expression.AccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -91,7 +94,7 @@ public class LibraryService {
         return briefProfileMapper.mapToListDTO(library.getSubscribers());
     }
 
-    public List<DocumentDTO> getDocumentsByLibraryId(Long libraryId) throws AccessException {
+    public List<DocumentDTO> getDocumentsByLibraryId(Long libraryId) {
         Library library = getLibraryById(libraryId);
         UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
 
@@ -99,20 +102,26 @@ public class LibraryService {
             if (checkLibraryOwnerAccess(libraryId, universityUser) ||
                     checkLibrarySubscriberAccess(libraryId, universityUser)) {
                 return documentMapper.mapListToDTO(library.getDocuments());
-            }
+            } else throw new LibraryAccessException("You have not the owner or subscriber of this library");
         } else return documentMapper.mapListToDTO(library.getDocuments());
-        throw new AccessException("Access forbidden");
     }
 
 
-    public LibraryDTO createLibrary(LibraryDTO libraryDTO) {
+    public LibraryDTO createLibrary(String title,
+                                    String topic,
+                                    Boolean libraryAccess) {
         UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
-        Library library = libraryMapper.mapToEntity(libraryDTO);
+        Library library = Library.builder()
+                .title(title)
+                .topic(topic)
+                .libraryAccess(libraryAccess)
+                .university(universityUser.getUniversity())
+                .build();
 
-        library.setUniversity(universityUser.getUniversity());
         libraryRepository.save(library);
 
         universityUser.addOwnLibrary(library);
+
         universityUserRepository.save(universityUser);
         return libraryMapper.mapToDTO(library);
     }
@@ -121,107 +130,86 @@ public class LibraryService {
         UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
         Library library = getLibraryById(libraryId);
 
+        if (universityUser.getSubscribedLibraries().contains(library) ||
+                universityUser.getOwnLibraries().contains(library))
+            throw new LibraryBadRequestException("You are the owner of the library or are already subscribed to it");
+
         universityUser.addSubscribedLibrary(library);
         universityUserRepository.save(universityUser);
         return libraryMapper.mapToListDTO(universityUser.getSubscribedLibraries());
     }
 
-    public void subscribeUser(Long libraryId, String email) throws AccessException {
+    public void subscribeUser(Long libraryId, String email) {
         UniversityUser owner = securityUtils.getUserFromSecurityContextHolder();
 
-        if (checkLibraryOwnerAccess(libraryId, owner)) {
-            Library library = getLibraryById(libraryId);
-            UniversityUser universityUser = universityUserRepository.findUniversityUserByEmail(email)
-                    .orElseThrow(() -> new UserNotFoundException("User with email = " + email + " not found"));
+        if (!checkLibraryOwnerAccess(libraryId, owner))
+            throw new LibraryAccessException("You are not the library owner");
 
-            universityUser.addSubscribedLibrary(library);
-            universityUserRepository.save(universityUser);
-        } else throw new AccessException("Access restricted");
+        Library library = getLibraryById(libraryId);
+        UniversityUser universityUser = getUniversityUserByEmail(email);
+
+        if (universityUser.getSubscribedLibraries().contains(library) ||
+                universityUser.getOwnLibraries().contains(library))
+            throw new LibraryBadRequestException("User '" + email + "' is owner of the library or is already subscribed to it");
+
+        universityUser.addSubscribedLibrary(library);
+        universityUserRepository.save(universityUser);
     }
 
-    public void unsubscribeUser(Long libraryId, String email) throws AccessException {
+    public void unsubscribeUser(Long libraryId, String email) {
         UniversityUser owner = securityUtils.getUserFromSecurityContextHolder();
 
-        if (checkLibraryOwnerAccess(libraryId, owner)) {
-            Library library = getLibraryById(libraryId);
-            UniversityUser universityUser = universityUserRepository.findUniversityUserByEmail(email)
-                    .orElseThrow(() -> new UserNotFoundException("User with email = " + email + " not found"));
+        if (!checkLibraryOwnerAccess(libraryId, owner))
+            throw new LibraryAccessException("You are not the library owner");
 
-            universityUser.removeSubscribedLibrary(library);
-            universityUserRepository.save(universityUser);
-        } else throw new AccessException("Access restricted");
+        Library library = getLibraryById(libraryId);
+        UniversityUser universityUser = getUniversityUserByEmail(email);
+
+        if (!universityUser.getSubscribedLibraries().contains(library))
+            throw new LibraryBadRequestException("User '" + email + "' is not subscribed to this library");
+
+        universityUser.removeSubscribedLibrary(library);
+        universityUserRepository.save(universityUser);
     }
 
     public List<LibraryDTO> unsubscribeLibrary(Long libraryId) {
         UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
         Library library = getLibraryById(libraryId);
 
+        if (universityUser.getSubscribedLibraries().contains(library))
+            throw new LibraryBadRequestException("Library with id = '" + libraryId + "' is not present in your list of subscribed libraries");
+
         universityUser.removeSubscribedLibrary(library);
         universityUserRepository.save(universityUser);
+
         return libraryMapper.mapToListDTO(universityUser.getSubscribedLibraries());
     }
 
-    public Resource downloadDocument(Long documentId) throws MalformedURLException {
-        Document document = getDocumentById(documentId);
-        Path path = Paths.get(document.getFilePath());
-        return new UrlResource(path.toUri());
-    }
-
-    public DocumentDTO uploadDocument(MultipartFile file,
-                                      String title, String topic, String description,
-                                      Long libraryId) throws IOException, AccessException {
-        UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
-
-        if (checkLibraryOwnerAccess(libraryId, universityUser)) {
-            Library library = libraryRepository.findById(libraryId).orElseThrow();
-
-            String path = "D:\\CrossUniversityLibrary\\";
-
-            Document document = Document.builder()
-                    .title(title)
-                    .topic(topic)
-                    .description(description)
-                    .filePath(path + file.getOriginalFilename())
-                    .fileSize(file.getSize() / 1_000_000.0)
-                    .libraries(new ArrayList<>())
-                    .owner(universityUser)
-                    .build();
-
-            universityUser.decreaseSpace(document.getFileSize());
-            library.addDocument(document);
-
-            documentRepository.save(document);
-
-            Path filePath = Paths.get(path, file.getOriginalFilename());
-            file.transferTo(filePath.toFile());
-
-            return documentMapper.mapToDTO(document);
-        } else throw new AccessException("Access restricted");
-    }
-
-    public LibraryDTO updateLibrary(LibraryDTO libraryDTO) throws AccessException {
+    public LibraryDTO updateLibrary(LibraryDTO libraryDTO) {
         UniversityUser owner = securityUtils.getUserFromSecurityContextHolder();
 
         Long libraryId = libraryDTO.getId();
 
-        if (checkLibraryOwnerAccess(libraryId, owner)) {
-            Library library = getLibraryById(libraryId);
+        if (!checkLibraryOwnerAccess(libraryId, owner))
+            throw new LibraryAccessException("You are not the owner of this library");
 
-            Library updatedLibrary = libraryMapper.updateEntity(libraryDTO, library);
+        Library library = getLibraryById(libraryId);
 
-            libraryRepository.save(updatedLibrary);
+        Library updatedLibrary = libraryMapper.updateEntity(libraryDTO, library);
 
-            return libraryMapper.mapToDTO(updatedLibrary);
-        } else throw new AccessException("Access restricted");
+        libraryRepository.save(updatedLibrary);
+
+        return libraryMapper.mapToDTO(updatedLibrary);
     }
 
-    public void deleteLibrary(Long libraryId) throws AccessException {
+    public void deleteLibrary(Long libraryId) {
         UniversityUser owner = securityUtils.getUserFromSecurityContextHolder();
 
-        if (checkLibraryOwnerAccess(libraryId, owner)) {
-            libraryRepository.deleteLibrary(libraryId);
-            log.info("Delete from library table");
-        } else throw new AccessException("Access restricted");
+        if (!checkLibraryOwnerAccess(libraryId, owner))
+            throw new LibraryAccessException("You are not the owner of this library");
+
+        libraryRepository.deleteLibrary(libraryId);
+        log.info("Delete from library table");
     }
 
     public List<LibraryDTO> findLibrariesBy(Long universityId, String title, String topic, String ownerEmail) {
@@ -249,65 +237,122 @@ public class LibraryService {
         return libraryMapper.mapToListDTO(libraryRepository.findLibrariesByTitleAndTopicAndOwner(title, topic, ownerEmail));
     }
 
-    public void addExistedDocumentToLibrary(Long libraryId, Long documentId) throws AccessException {
-        UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
-        Library library = getLibraryById(libraryId);
-        if (checkLibraryOwnerAccess(libraryId, universityUser)) {
-            Document document = getDocumentById(documentId);
-            library.addDocument(document);
-
-            libraryRepository.save(library);
-        } else throw new AccessException("Access forbidden");
+    public Resource downloadDocument(Long documentId) throws MalformedURLException {
+        Document document = getDocumentById(documentId);
+        Path path = Paths.get(document.getFilePath());
+        return new UrlResource(path.toUri());
     }
 
-    public void deleteDocument(Long documentId) throws AccessException {
+    public DocumentDTO uploadDocument(MultipartFile file,
+                                      String title, String topic, String description,
+                                      Long libraryId) throws IOException {
         UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
-        if (checkDocumentOwnerAccess(documentId, universityUser)) {
-            Document document = getDocumentById(documentId);
 
-            universityUser.increaseSpace(document.getFileSize());
+        if (!checkLibraryOwnerAccess(libraryId, universityUser))
+            throw new LibraryAccessException("You are not the library owner");
 
+        Library library = libraryRepository.findById(libraryId).orElseThrow();
+
+        String path = "D:\\CrossUniversityLibrary\\";
+
+        Document document = Document.builder()
+                .title(title)
+                .topic(topic)
+                .description(description)
+                .filePath(path + file.getOriginalFilename())
+                .fileSize(file.getSize() / 1_000_000.0)
+                .libraries(new ArrayList<>())
+                .owner(universityUser)
+                .build();
+
+        universityUser.decreaseSpace(document.getFileSize());
+
+        library.addDocument(document);
+        documentRepository.save(document);
+
+        Path filePath = Paths.get(path, file.getOriginalFilename());
+        file.transferTo(filePath.toFile());
+
+        return documentMapper.mapToDTO(document);
+    }
+
+    public void addExistedDocumentToLibrary(Long libraryId, Long documentId) {
+        UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
+        Library library = getLibraryById(libraryId);
+
+        if (!checkLibraryOwnerAccess(libraryId, universityUser))
+            throw new LibraryAccessException("You are not the library owner");
+
+        Document document = getDocumentById(documentId);
+
+        if (library.getDocuments().contains(document))
+            throw new DocumentBadRequestException("Document with id = '" + documentId + "' is already present in this library");
+
+        library.addDocument(document);
+
+        libraryRepository.save(library);
+    }
+
+    public void deleteDocument(Long documentId) {
+        UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
+
+        if (!checkDocumentOwnerAccess(documentId, universityUser))
+            throw new DocumentAccessException("You are not the owner of this document");
+
+        Document document = getDocumentById(documentId);
+
+        universityUser.increaseSpace(document.getFileSize());
+
+        documentRepository.deleteDocumentById(documentId);
+    }
+
+    public void removeExistedDocumentFromLibrary(Long libraryId, Long documentId) {
+        UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
+
+        if (!checkLibraryOwnerAccess(libraryId, universityUser))
+            throw new LibraryAccessException("You are not the library owner");
+
+        Library library = getLibraryById(libraryId);
+        Document document = getDocumentById(documentId);
+
+        if (library.getDocuments().contains(document))
+            throw new DocumentBadRequestException("Document with id = '" + documentId + "' is not present in this library");
+
+        library.removeDocument(document);
+        libraryRepository.save(library);
+
+        List<Library> libraries = document.getLibraries();
+        if (libraries.isEmpty())
             documentRepository.deleteDocumentById(documentId);
-        } else throw new AccessException("Access forbidden");
     }
 
-    public void removeExistedDocumentFromLibrary(Long libraryId, Long documentId) throws AccessException {
+    public DocumentDTO updateDocument(DocumentDTO documentDTO) {
         UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
-        Library library = getLibraryById(libraryId);
-        if (checkLibraryOwnerAccess(libraryId, universityUser)) {
-            Document document = getDocumentById(documentId);
-            library.removeDocument(document);
 
-            libraryRepository.save(library);
+        if (!checkDocumentOwnerAccess(documentDTO.getId(), universityUser))
+            throw new DocumentAccessException("You are not the owner of this document");
 
-            List<Library> libraries = document.getLibraries();
-            if (libraries.isEmpty())
-                documentRepository.deleteDocumentById(documentId);
-        } else throw new AccessException("Access forbidden");
+        Document document = getDocumentById(documentDTO.getId());
+
+        Document updatedDocument = documentMapper.updateEntity(documentDTO, document);
+
+        documentRepository.save(updatedDocument);
+        return documentMapper.mapToDTO(updatedDocument);
     }
 
-    public DocumentDTO updateDocument(DocumentDTO documentDTO) throws AccessException {
-        UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
-        if (checkDocumentOwnerAccess(documentDTO.getId(), universityUser)) {
-            Document document = getDocumentById(documentDTO.getId());
-
-            document.setTitle(documentDTO.getTitle());
-            document.setTopic(documentDTO.getTopic());
-            document.setDescription(documentDTO.getDescription());
-
-            documentRepository.save(document);
-            return documentMapper.mapToDTO(document);
-        } else throw new AccessException("Access forbidden");
+    private UniversityUser getUniversityUserByEmail(String email) {
+        return universityUserRepository.findUniversityUserByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User email = '" + email + "' not found"));
     }
 
     private Library getLibraryById(Long libraryId) {
         return libraryRepository.findById(libraryId)
-                .orElseThrow(() -> new LibraryNotFoundException("Library with id = " + libraryId + " does not exist"));
+                .orElseThrow(() -> new LibraryNotFoundException("Library with id = '" + libraryId + "' does not exist"));
     }
 
     private Document getDocumentById(Long documentId) {
         return documentRepository.findById(documentId).orElseThrow(() ->
-                new DocumentNotFoundException("Document with id = " + documentId + " does not exist"));
+                new DocumentNotFoundException("Document with id = '" + documentId + "' does not exist"));
     }
 
     private boolean checkLibraryOwnerAccess(Long libraryId, UniversityUser universityUser) {
