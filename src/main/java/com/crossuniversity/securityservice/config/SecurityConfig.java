@@ -45,7 +45,10 @@ public class SecurityConfig {
                 .requestMatchers(
                         "/auth/authenticate",
                         "/auth/student-registration",
-                        "/swagger-ui/**", "/v3/api-docs/**",
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/openapi.yaml",
                         "/swagger-resources/**", "/test/**",
                         "/library/university/**").permitAll()
                 .requestMatchers("/library/create-with-access")

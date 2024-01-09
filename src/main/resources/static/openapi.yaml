@@ -1,0 +1,2149 @@
+openapi: 3.0.1
+info:
+  title: CrossUniversityLibrary
+  description: OpenAPI documentation for RESTful Service CrossUniversityLibrary
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Localhost Server URL
+  - url: http://25.59.220.248:8080
+    description: Hamachi Server URL
+security:
+  - bearerAuth: []
+paths:
+  /user/update-profile:
+    put:
+      tags:
+        - User Controller
+      summary: Update the user profile by changing the username
+      description: >-
+        This API endpoint is accessible to authenticated users, allowing them to
+        update their user profile by changing the username.
+      operationId: updateProfile
+      parameters:
+        - name: userName
+          in: query
+          description: New username to be set
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: >-
+            The request was successful. The server has processed the request and
+            the operation was completed without errors.
+          content:
+            application/json:
+              example:
+                id: 1
+                userName: User Name
+                email: email@example.com
+                space: 1024
+                university:
+                  id: 1
+                  title: university_title
+                  domain: university_domain
+                ownLibraries:
+                  - id: 3
+                    title: library1_title
+                    topic: library1_topic
+                    libraryAccess: false
+                subscribedLibraries:
+                  - id: 2
+                    title: library2_title
+                    topic: library2_topic
+                    libraryAccess: true
+        '401':
+          description: >-
+            Access to this resource requires authentication. Please log in to
+            your account to gain the necessary permissions and access the
+            requested resource.
+          content:
+            application/json:
+              example:
+                message: Unauthorized example message
+                httpStatus: UNAUTHORIZED
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '403':
+          description: >-
+            Access to the requested resource is forbidden. The authenticated
+            user lacks the necessary permissions to perform the requested
+            operation.
+          content:
+            application/json:
+              example:
+                message: Forbidden example message
+                httpStatus: FORBIDDEN
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /library/{libraryId}/unsubscribe:
+    put:
+      tags:
+        - Library Controller
+      summary: Unsubscribe from a library
+      description: >-
+        This API endpoint is accessible to authenticated users, allowing them to
+        unsubscribe from a library to which they are subscribed. Users can
+        provide the library ID from which they want to unsubscribe. The response
+        includes the updated list of libraries from which the user is
+        unsubscribed, presented in the form of LibraryDTO (Data Transfer Object)
+        instances.
+      operationId: unsubscribeLibrary
+      parameters:
+        - name: libraryId
+          in: path
+          description: ID of the library from which the user wants to unsubscribe
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: >-
+            The request was successful. The server has processed the request and
+            the operation was completed without errors.
+          content:
+            application/json:
+              example:
+                libraries:
+                  - id: 3
+                    title: Student1_library1
+                    topic: History
+                    libraryAccess: false
+                  - id: 5
+                    title: Student2_library2
+                    topic: Math
+                    libraryAccess: false
+        '401':
+          description: >-
+            Access to this resource requires authentication. Please log in to
+            your account to gain the necessary permissions and access the
+            requested resource.
+          content:
+            application/json:
+              example:
+                message: Unauthorized example message
+                httpStatus: UNAUTHORIZED
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '404':
+          description: >-
+            The requested resource could not be found on the server. No data
+            exists for this specific request. Please verify the URL and ensure
+            that the resource exists.
+          content:
+            application/json:
+              example:
+                message: Not found example message
+                httpStatus: NOT_FOUND
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /library/{libraryId}/unsubscribe/{email}:
+    put:
+      tags:
+        - Library Controller
+      summary: Unsubscribe a user from a library
+      description: >-
+        This API endpoint is accessible to authenticated users, allowing them to
+        unsubscribe another user from a library they own. Users can provide the
+        library ID and the email of the user they want to unsubscribe. The
+        response is a standard 204 No Content status, indicating a successful
+        operation without additional response data.
+      operationId: unsubscribeUser
+      parameters:
+        - name: libraryId
+          in: path
+          description: >-
+            ID of the library from which the user wants to unsubscribe another
+            user
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: email
+          in: path
+          description: The email of the user to be unsubscribed
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: >-
+            The request was successful, but there is no additional content to
+            return. The server has processed the request, and no response body
+            is provided.
+          content:
+            '*/*':
+              schema:
+                type: object
+        '401':
+          description: >-
+            Access to this resource requires authentication. Please log in to
+            your account to gain the necessary permissions and access the
+            requested resource.
+          content:
+            application/json:
+              example:
+                message: Unauthorized example message
+                httpStatus: UNAUTHORIZED
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '403':
+          description: >-
+            Access to the requested resource is forbidden. The authenticated
+            user lacks the necessary permissions to perform the requested
+            operation.
+          content:
+            application/json:
+              example:
+                message: Forbidden example message
+                httpStatus: FORBIDDEN
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '404':
+          description: >-
+            The requested resource could not be found on the server. No data
+            exists for this specific request. Please verify the URL and ensure
+            that the resource exists.
+          content:
+            application/json:
+              example:
+                message: Not found example message
+                httpStatus: NOT_FOUND
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /library/{libraryId}/subscribe:
+    put:
+      tags:
+        - Library Controller
+      summary: Subscribe to a library
+      description: >-
+        This API endpoint is accessible to authenticated users, enabling them to
+        subscribe to a library. Users can provide the library ID to which they
+        want to subscribe. The response includes the updated list of libraries
+        to which the user is subscribed, presented in the form of LibraryDTO
+        (Data Transfer Object) instances.
+      operationId: subscribeToLibrary
+      parameters:
+        - name: libraryId
+          in: path
+          description: ID of the library to which the user wants to subscribe
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: >-
+            The request was successful. The server has processed the request and
+            the operation was completed without errors.
+          content:
+            application/json:
+              example:
+                libraries:
+                  - id: 3
+                    title: Student1_library1
+                    topic: History
+                    libraryAccess: false
+                  - id: 5
+                    title: Student2_library2
+                    topic: Math
+                    libraryAccess: false
+        '400':
+          description: >-
+            The server could not understand the request due to invalid or
+            malformed parameters.
+          content:
+            application/json:
+              example:
+                message: Bad request example message
+                httpStatus: BAD_REQUEST
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '401':
+          description: >-
+            Access to this resource requires authentication. Please log in to
+            your account to gain the necessary permissions and access the
+            requested resource.
+          content:
+            application/json:
+              example:
+                message: Unauthorized example message
+                httpStatus: UNAUTHORIZED
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '404':
+          description: >-
+            The requested resource could not be found on the server. No data
+            exists for this specific request. Please verify the URL and ensure
+            that the resource exists.
+          content:
+            application/json:
+              example:
+                message: Not found example message
+                httpStatus: NOT_FOUND
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /library/{libraryId}/subscribe/{email}:
+    put:
+      tags:
+        - Library Controller
+      summary: Subscribe a user to a library
+      description: >-
+        This API endpoint is accessible to authenticated users, enabling them to
+        subscribe another user to a library they own. Users can provide the
+        library ID and the email of the user they want to subscribe. The
+        response is a standard 204 No Content status, indicating a successful
+        operation without additional response data.
+      operationId: subscribeUser
+      parameters:
+        - name: libraryId
+          in: path
+          description: ID of the library to which the user wants to subscribe another user
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: email
+          in: path
+          description: The email of the user to be subscribed
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: >-
+            The request was successful, but there is no additional content to
+            return. The server has processed the request, and no response body
+            is provided.
+          content:
+            '*/*':
+              schema:
+                type: object
+        '400':
+          description: >-
+            The server could not understand the request due to invalid or
+            malformed parameters.
+          content:
+            application/json:
+              example:
+                message: Bad request example message
+                httpStatus: BAD_REQUEST
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '401':
+          description: >-
+            Access to this resource requires authentication. Please log in to
+            your account to gain the necessary permissions and access the
+            requested resource.
+          content:
+            application/json:
+              example:
+                message: Unauthorized example message
+                httpStatus: UNAUTHORIZED
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '403':
+          description: >-
+            Access to the requested resource is forbidden. The authenticated
+            user lacks the necessary permissions to perform the requested
+            operation.
+          content:
+            application/json:
+              example:
+                message: Forbidden example message
+                httpStatus: FORBIDDEN
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '404':
+          description: >-
+            The requested resource could not be found on the server. No data
+            exists for this specific request. Please verify the URL and ensure
+            that the resource exists.
+          content:
+            application/json:
+              example:
+                message: Not found example message
+                httpStatus: NOT_FOUND
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /library/{libraryId}/document/{documentId}/remove:
+    put:
+      tags:
+        - Library Controller
+      summary: Remove an existing document from a library
+      description: >-
+        This API endpoint is accessible to authenticated users, allowing them to
+        remove an existing document from their library, specifically documents
+        that were added from other libraries. Users can provide the library ID
+        and the document ID to be removed. The response is a standard 204 No
+        Content status, indicating a successful operation without additional
+        response data.
+      operationId: removeDocumentFromLibrary
+      parameters:
+        - name: libraryId
+          in: path
+          description: >-
+            ID of the library from which the user wants to remove an existing
+            document
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: documentId
+          in: path
+          description: ID of the existing document to be removed
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: >-
+            The request was successful, but there is no additional content to
+            return. The server has processed the request, and no response body
+            is provided.
+          content:
+            '*/*':
+              schema:
+                type: object
+        '401':
+          description: >-
+            Access to this resource requires authentication. Please log in to
+            your account to gain the necessary permissions and access the
+            requested resource.
+          content:
+            application/json:
+              example:
+                message: Unauthorized example message
+                httpStatus: UNAUTHORIZED
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '403':
+          description: >-
+            Access to the requested resource is forbidden. The authenticated
+            user lacks the necessary permissions to perform the requested
+            operation.
+          content:
+            application/json:
+              example:
+                message: Forbidden example message
+                httpStatus: FORBIDDEN
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '404':
+          description: >-
+            The requested resource could not be found on the server. No data
+            exists for this specific request. Please verify the URL and ensure
+            that the resource exists.
+          content:
+            application/json:
+              example:
+                message: Not found example message
+                httpStatus: NOT_FOUND
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /library/{libraryId}/document/{documentId}/add:
+    put:
+      tags:
+        - Library Controller
+      summary: Add an existing document to a library
+      description: >-
+        This API endpoint is accessible to authenticated users, allowing them to
+        add an existing document from other libraries to libraries they own.
+        Users can provide the library ID and the document ID to be added. The
+        response is a standard 204 No Content status, indicating a successful
+        operation without additional response data.
+      operationId: addExistedDocumentToLibrary
+      parameters:
+        - name: libraryId
+          in: path
+          description: >-
+            ID of the library to which the user wants to add an existing
+            document
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: documentId
+          in: path
+          description: ID of the existing document to be added
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: >-
+            The request was successful, but there is no additional content to
+            return. The server has processed the request, and no response body
+            is provided.
+          content:
+            '*/*':
+              schema:
+                type: object
+        '401':
+          description: >-
+            Access to this resource requires authentication. Please log in to
+            your account to gain the necessary permissions and access the
+            requested resource.
+          content:
+            application/json:
+              example:
+                message: Unauthorized example message
+                httpStatus: UNAUTHORIZED
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '403':
+          description: >-
+            Access to the requested resource is forbidden. The authenticated
+            user lacks the necessary permissions to perform the requested
+            operation.
+          content:
+            application/json:
+              example:
+                message: Forbidden example message
+                httpStatus: FORBIDDEN
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '404':
+          description: >-
+            The requested resource could not be found on the server. No data
+            exists for this specific request. Please verify the URL and ensure
+            that the resource exists.
+          content:
+            application/json:
+              example:
+                message: Not found example message
+                httpStatus: NOT_FOUND
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /library/update:
+    put:
+      tags:
+        - Library Controller
+      summary: Update library information
+      description: >-
+        This API endpoint is accessible to authenticated users, allowing them to
+        update the title and topic of a library they own. Users can provide a
+        LibraryDTO (Data Transfer Object) containing the updated information.
+        The response includes the updated LibraryDTO instance representing the
+        modified library.
+      operationId: updateLibrary
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LibraryDTO'
+            example:
+              id: 3
+              title: library1_title
+              topic: History
+              libraryAccess: false
+        required: true
+      responses:
+        '200':
+          description: >-
+            The request was successful. The server has processed the request and
+            the operation was completed without errors.
+          content:
+            application/json:
+              example:
+                id: 3
+                title: library1_title
+                topic: History
+                libraryAccess: false
+        '401':
+          description: >-
+            Access to this resource requires authentication. Please log in to
+            your account to gain the necessary permissions and access the
+            requested resource.
+          content:
+            application/json:
+              example:
+                message: Unauthorized example message
+                httpStatus: UNAUTHORIZED
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '403':
+          description: >-
+            Access to the requested resource is forbidden. The authenticated
+            user lacks the necessary permissions to perform the requested
+            operation.
+          content:
+            application/json:
+              example:
+                message: Forbidden example message
+                httpStatus: FORBIDDEN
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '404':
+          description: >-
+            The requested resource could not be found on the server. No data
+            exists for this specific request. Please verify the URL and ensure
+            that the resource exists.
+          content:
+            application/json:
+              example:
+                message: Not found example message
+                httpStatus: NOT_FOUND
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /library/document/update:
+    put:
+      tags:
+        - Library Controller
+      summary: Update document information
+      description: >-
+        This API endpoint is accessible to authenticated users, specifically
+        allowing the owner to update information about a document, including the
+        title, topic, and description. Users can provide a DocumentDTO (Data
+        Transfer Object) containing the updated information. The response
+        includes the updated DocumentDTO instance representing the modified
+        document.
+      operationId: updateDocument
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentDTO'
+            example:
+              id: 4
+              title: Document 4
+              topic: Math Science
+              description: Description for Document 4
+        required: true
+      responses:
+        '200':
+          description: >-
+            The request was successful. The server has processed the request and
+            the operation was completed without errors.
+          content:
+            application/json:
+              example:
+                id: 4
+                title: Document 4
+                topic: Math Science
+                description: Description for Document 4
+                owner:
+                  id: 1
+                  userName: student1_name
+                  email: student1kpi@kpi.ua
+        '401':
+          description: >-
+            Access to this resource requires authentication. Please log in to
+            your account to gain the necessary permissions and access the
+            requested resource.
+          content:
+            application/json:
+              example:
+                message: Unauthorized example message
+                httpStatus: UNAUTHORIZED
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '403':
+          description: >-
+            Access to the requested resource is forbidden. The authenticated
+            user lacks the necessary permissions to perform the requested
+            operation.
+          content:
+            application/json:
+              example:
+                message: Forbidden example message
+                httpStatus: FORBIDDEN
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '404':
+          description: >-
+            The requested resource could not be found on the server. No data
+            exists for this specific request. Please verify the URL and ensure
+            that the resource exists.
+          content:
+            application/json:
+              example:
+                message: Not found example message
+                httpStatus: NOT_FOUND
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /user/confirm-old-password:
+    post:
+      tags:
+        - User Controller
+      summary: >-
+        Confirm the old password before initiating the password-changing
+        procedure
+      description: >-
+        This API endpoint is accessible to authenticated users, allowing them to
+        confirm their old password before initiating the password-changing
+        procedure. The user needs to provide their current password for
+        confirmation. After successful confirmation, a secret code is sent to
+        the user's email for further identification in the password-changing
+        process.
+      operationId: confirmOldPassword
+      parameters:
+        - name: confirmedPassword
+          in: query
+          description: Current password to be confirmed
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: >-
+            The request was successful, but there is no additional content to
+            return. The server has processed the request, and no response body
+            is provided.
+          content:
+            '*/*':
+              schema:
+                type: object
+        '401':
+          description: >-
+            Access to this resource requires authentication. Please log in to
+            your account to gain the necessary permissions and access the
+            requested resource.
+          content:
+            application/json:
+              example:
+                message: Unauthorized example message
+                httpStatus: UNAUTHORIZED
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '403':
+          description: >-
+            Access to the requested resource is forbidden. The authenticated
+            user lacks the necessary permissions to perform the requested
+            operation.
+          content:
+            application/json:
+              example:
+                message: Forbidden example message
+                httpStatus: FORBIDDEN
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /user/change-password:
+    post:
+      tags:
+        - User Controller
+      summary: Change the password with confirming the identity using secret code
+      description: >-
+        This API endpoint is accessible to authenticated users, allowing them to
+        change their password after confirming their identity with a copied
+        secret code. Once the user has received the secret code via email and
+        copied it, they provide the code along with the new password to this
+        method for identity confirmation. After successful confirmation, the
+        user can change their old password to the new one.
+      operationId: changePassword
+      parameters:
+        - name: copiedSecretCode
+          in: query
+          description: Secret code copied from the email
+          required: true
+          schema:
+            type: string
+        - name: newPassword
+          in: query
+          description: New password to be set
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: >-
+            The request was successful, but there is no additional content to
+            return. The server has processed the request, and no response body
+            is provided.
+          content:
+            '*/*':
+              schema:
+                type: object
+        '401':
+          description: >-
+            Access to this resource requires authentication. Please log in to
+            your account to gain the necessary permissions and access the
+            requested resource.
+          content:
+            application/json:
+              example:
+                message: Unauthorized example message
+                httpStatus: UNAUTHORIZED
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '403':
+          description: >-
+            Access to the requested resource is forbidden. The authenticated
+            user lacks the necessary permissions to perform the requested
+            operation.
+          content:
+            application/json:
+              example:
+                message: Forbidden example message
+                httpStatus: FORBIDDEN
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /university/register-university:
+    post:
+      tags:
+        - University Controller
+      summary: University registration by global administrators
+      description: >-
+        This API endpoint is accessible to users with the role of global
+        administrators, allowing them to register new universities in the
+        system. To register a university, users need to provide the title and
+        domain information through a UniversityRegisterRequest in the request
+        body.
+      operationId: registerUniversity
+      parameters:
+        - name: title
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: domain
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: >-
+            The resource has been successfully created. The server has processed
+            the request to create a new resource, and the operation was
+            completed without errors.
+          content:
+            application/json:
+              example:
+                id: 1
+                title: title_example
+                domain: domain.example
+        '400':
+          description: >-
+            The server could not understand the request due to invalid or
+            malformed parameters.
+          content:
+            application/json:
+              example:
+                message: Bad request example message
+                httpStatus: BAD_REQUEST
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /test/mail:
+    post:
+      tags:
+        - test-controller
+      operationId: sendEmail
+      parameters:
+        - name: context
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+  /library/{libraryId}/document/upload:
+    post:
+      tags:
+        - Library Controller
+      summary: Upload a document to a user's library
+      description: >-
+        This API endpoint is accessible to authenticated users, allowing them to
+        upload a document to their library. Users can provide details such as
+        the file, title, topic, description, and the library ID where the
+        document should be uploaded. The response includes relevant details
+        about the uploaded document, presented in the form of DocumentDTO (Data
+        Transfer Object) instances.
+      operationId: uploadDocument
+      parameters:
+        - name: title
+          in: query
+          description: The title of the document
+          required: true
+          schema:
+            type: string
+        - name: topic
+          in: query
+          description: The topic of the document
+          required: true
+          schema:
+            type: string
+        - name: description
+          in: query
+          description: The description of the document
+          required: true
+          schema:
+            type: string
+        - name: libraryId
+          in: path
+          description: ID of the library to which the document will be uploaded
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - file
+              type: object
+              properties:
+                file:
+                  type: string
+                  description: The document file to be uploaded
+                  format: binary
+      responses:
+        '201':
+          description: >-
+            The resource has been successfully created. The server has processed
+            the request to create a new resource, and the operation was
+            completed without errors.
+          content:
+            application/json:
+              example:
+                id: 4
+                title: Document 4
+                topic: Math Science
+                description: Description for Document 4
+                owner:
+                  id: 1
+                  userName: student1_name
+                  email: student1kpi@kpi.ua
+        '401':
+          description: >-
+            Access to this resource requires authentication. Please log in to
+            your account to gain the necessary permissions and access the
+            requested resource.
+          content:
+            application/json:
+              example:
+                message: Unauthorized example message
+                httpStatus: UNAUTHORIZED
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '403':
+          description: >-
+            Access to the requested resource is forbidden. The authenticated
+            user lacks the necessary permissions to perform the requested
+            operation.
+          content:
+            application/json:
+              example:
+                message: Forbidden example message
+                httpStatus: FORBIDDEN
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '404':
+          description: >-
+            The requested resource could not be found on the server. No data
+            exists for this specific request. Please verify the URL and ensure
+            that the resource exists.
+          content:
+            application/json:
+              example:
+                message: Not found example message
+                httpStatus: NOT_FOUND
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /library/create:
+    post:
+      tags:
+        - Library Controller
+      summary: Create a library with default closed access
+      description: >-
+        This API endpoint is accessible to authenticated users, allowing them to
+        create a new library specifically for students. Libraries created by
+        students always have restricted access. The response includes relevant
+        details about the created library, presented in the form of LibraryDTO
+        (Data Transfer Object) instances
+      operationId: createLibrary
+      parameters:
+        - name: title
+          in: query
+          description: The title of the library
+          required: true
+          schema:
+            type: string
+        - name: topic
+          in: query
+          description: The topic of the library
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: >-
+            The resource has been successfully created. The server has processed
+            the request to create a new resource, and the operation was
+            completed without errors.
+          content:
+            application/json:
+              example:
+                id: 3
+                title: library1_title
+                topic: History
+                libraryAccess: false
+        '401':
+          description: >-
+            Access to this resource requires authentication. Please log in to
+            your account to gain the necessary permissions and access the
+            requested resource.
+          content:
+            application/json:
+              example:
+                message: Unauthorized example message
+                httpStatus: UNAUTHORIZED
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '403':
+          description: >-
+            Access to the requested resource is forbidden. The authenticated
+            user lacks the necessary permissions to perform the requested
+            operation.
+          content:
+            application/json:
+              example:
+                message: Forbidden example message
+                httpStatus: FORBIDDEN
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /library/create-with-access:
+    post:
+      tags:
+        - Library Controller
+      summary: Create a library with specified access settings
+      description: >-
+        This API endpoint allows authenticated users with the role of teacher or
+        higher to create a library with specific access settings. The method
+        accepts parameters for the library's title, topic, and access (open or
+        closed). Upon successful execution, it returns a ResponseEntity
+        containing the created LibraryDTO and an HTTP status code of 201
+        (CREATED).
+      operationId: createLibraryWithAccess
+      parameters:
+        - name: title
+          in: query
+          description: The title of the library
+          required: true
+          schema:
+            type: string
+        - name: topic
+          in: query
+          description: The topic of the library
+          required: true
+          schema:
+            type: string
+        - name: libraryAccess
+          in: query
+          description: The access setting for the library (true for open, false for closed)
+          required: true
+          schema:
+            type: boolean
+      responses:
+        '201':
+          description: >-
+            The resource has been successfully created. The server has processed
+            the request to create a new resource, and the operation was
+            completed without errors.
+          content:
+            application/json:
+              example:
+                id: 3
+                title: library1_title
+                topic: History
+                libraryAccess: false
+        '401':
+          description: >-
+            Access to this resource requires authentication. Please log in to
+            your account to gain the necessary permissions and access the
+            requested resource.
+          content:
+            application/json:
+              example:
+                message: Unauthorized example message
+                httpStatus: UNAUTHORIZED
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '403':
+          description: >-
+            Access to the requested resource is forbidden. The authenticated
+            user lacks the necessary permissions to perform the requested
+            operation.
+          content:
+            application/json:
+              example:
+                message: Forbidden example message
+                httpStatus: FORBIDDEN
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /auth/university-admin-registration:
+    post:
+      tags:
+        - Authentication Controller
+      summary: University administrator registration by global administrators
+      description: >-
+        This API endpoint is accessible to users with the role of global
+        administrators, allowing them to register university administrators in
+        the system using their email addresses. The response includes a
+        CredentialDTO containing the registration information(email and
+        generated password). After successful registration, the system sends an
+        email to the university administrator containing login credentials.
+      operationId: universityAdminRegistration
+      parameters:
+        - name: email
+          in: query
+          description: Email address of the university admin to be registered
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: >-
+            The resource has been successfully created. The server has processed
+            the request to create a new resource, and the operation was
+            completed without errors.
+          content:
+            application/json:
+              example:
+                email: email_example@kpi.ua
+                password: password_example
+        '400':
+          description: >-
+            The server could not understand the request due to invalid or
+            malformed parameters.
+          content:
+            application/json:
+              example:
+                message: Bad request example message
+                httpStatus: BAD_REQUEST
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '404':
+          description: >-
+            The requested resource could not be found on the server. No data
+            exists for this specific request. Please verify the URL and ensure
+            that the resource exists.
+          content:
+            application/json:
+              example:
+                message: Not found example message
+                httpStatus: NOT_FOUND
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /auth/teacher-registration:
+    post:
+      tags:
+        - Authentication Controller
+      summary: Teacher registration by university administrators
+      description: >-
+        This API endpoint is accessible to users with the role of university
+        administrators, specifically allowing them to register teachers in the
+        system using their email addresses. The response includes a
+        CredentialDTO containing the registration information(email and
+        generated password). After successful registration, the system sends an
+        email to the teacher containing login credentials.
+      operationId: teacherRegistration
+      parameters:
+        - name: email
+          in: query
+          description: Email address of the teacher to be registered
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: >-
+            The request was successful. The server has processed the request and
+            the operation was completed without errors.
+          content:
+            application/json:
+              example:
+                email: email_example@kpi.ua
+                password: password_example
+        '400':
+          description: >-
+            The server could not understand the request due to invalid or
+            malformed parameters.
+          content:
+            application/json:
+              example:
+                message: Bad request example message
+                httpStatus: BAD_REQUEST
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '404':
+          description: >-
+            The requested resource could not be found on the server. No data
+            exists for this specific request. Please verify the URL and ensure
+            that the resource exists.
+          content:
+            application/json:
+              example:
+                message: Not found example message
+                httpStatus: NOT_FOUND
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /auth/student-registration:
+    post:
+      tags:
+        - Authentication Controller
+      summary: Student registration
+      description: >-
+        This API endpoint is designed for student registration, allowing new
+        students to register by providing their email address and password. The
+        method accepts parameters for the student's email and password. The
+        response includes an AuthenticationResponse containing the
+        authentication token.
+      operationId: register
+      parameters:
+        - name: email
+          in: query
+          description: Email address for student registration
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: Password for student registration
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: >-
+            The request was successful. The server has processed the request and
+            the operation was completed without errors.
+          content:
+            application/json:
+              example:
+                accessToken: accessToken_example
+                refreshToken: refreshToken_example
+        '400':
+          description: >-
+            The server could not understand the request due to invalid or
+            malformed parameters.
+          content:
+            application/json:
+              example:
+                message: Bad request example message
+                httpStatus: BAD_REQUEST
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '404':
+          description: >-
+            The requested resource could not be found on the server. No data
+            exists for this specific request. Please verify the URL and ensure
+            that the resource exists.
+          content:
+            application/json:
+              example:
+                message: Not found example message
+                httpStatus: NOT_FOUND
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /auth/authenticate:
+    post:
+      tags:
+        - Authentication Controller
+      summary: User authentication
+      description: >-
+        This API endpoint is designed for user authentication, allowing
+        registered users to authenticate themselves by providing their email
+        address and password. The method accepts parameters for the student's
+        email and password. The response includes an AuthenticationResponse
+        containing the authentication token.
+      operationId: authentication
+      parameters:
+        - name: email
+          in: query
+          description: The email for login
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: The password for login
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: >-
+            The request was successful. The server has processed the request and
+            the operation was completed without errors.
+          content:
+            application/json:
+              example:
+                access_token: access_token_example
+                refresh_token: refresh_token_example
+        '400':
+          description: >-
+            The server could not understand the request due to invalid or
+            malformed parameters.
+          content:
+            application/json:
+              example:
+                message: Bad request example message
+                httpStatus: BAD_REQUEST
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '404':
+          description: >-
+            The requested resource could not be found on the server. No data
+            exists for this specific request. Please verify the URL and ensure
+            that the resource exists.
+          content:
+            application/json:
+              example:
+                message: Not found example message
+                httpStatus: NOT_FOUND
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /user/{email}/profile:
+    get:
+      tags:
+        - User Controller
+      summary: Retrieve the profile information of a user by email
+      description: >-
+        This API endpoint is accessible to authenticated users, allowing them to
+        retrieve and view the profile information of another user based on their
+        email. The profile information includes the user's ID, username, email,
+        available space, associated university details, and lists of owned and
+        subscribed libraries.
+      operationId: getUserProfileByEmail
+      parameters:
+        - name: email
+          in: path
+          description: >-
+            Email address of the user for whom the profile information is
+            requested
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: >-
+            The request was successful. The server has processed the request and
+            the operation was completed without errors.
+          content:
+            application/json:
+              example:
+                id: 1
+                userName: User Name
+                email: email@example.com
+                space: 1024
+                university:
+                  id: 1
+                  title: university_title
+                  domain: university_domain
+                ownLibraries:
+                  - id: 3
+                    title: library1_title
+                    topic: library1_topic
+                    libraryAccess: false
+                subscribedLibraries:
+                  - id: 2
+                    title: library2_title
+                    topic: library2_topic
+                    libraryAccess: true
+        '401':
+          description: >-
+            Access to this resource requires authentication. Please log in to
+            your account to gain the necessary permissions and access the
+            requested resource.
+          content:
+            application/json:
+              example:
+                message: Unauthorized example message
+                httpStatus: UNAUTHORIZED
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '403':
+          description: >-
+            Access to the requested resource is forbidden. The authenticated
+            user lacks the necessary permissions to perform the requested
+            operation.
+          content:
+            application/json:
+              example:
+                message: Forbidden example message
+                httpStatus: FORBIDDEN
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '404':
+          description: >-
+            The requested resource could not be found on the server. No data
+            exists for this specific request. Please verify the URL and ensure
+            that the resource exists.
+          content:
+            application/json:
+              example:
+                message: Not found example message
+                httpStatus: NOT_FOUND
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /user/profile:
+    get:
+      tags:
+        - User Controller
+      summary: Retrieve the profile information of the authenticated user
+      description: >-
+        This API endpoint is accessible to authenticated users, allowing them to
+        retrieve and view their own profile information. The profile information
+        includes the user's ID, username, email, available space, associated
+        university details, and lists of owned and subscribed libraries.
+      operationId: profile
+      responses:
+        '200':
+          description: >-
+            The request was successful. The server has processed the request and
+            the operation was completed without errors.
+          content:
+            application/json:
+              example:
+                id: 1
+                userName: User Name
+                email: email@example.com
+                space: 1024
+                university:
+                  id: 1
+                  title: university_title
+                  domain: university_domain
+                ownLibraries:
+                  - id: 3
+                    title: library1_title
+                    topic: library1_topic
+                    libraryAccess: false
+                subscribedLibraries:
+                  - id: 2
+                    title: library2_title
+                    topic: library2_topic
+                    libraryAccess: true
+        '401':
+          description: >-
+            Access to this resource requires authentication. Please log in to
+            your account to gain the necessary permissions and access the
+            requested resource.
+          content:
+            application/json:
+              example:
+                message: Unauthorized example message
+                httpStatus: UNAUTHORIZED
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '403':
+          description: >-
+            Access to the requested resource is forbidden. The authenticated
+            user lacks the necessary permissions to perform the requested
+            operation.
+          content:
+            application/json:
+              example:
+                message: Forbidden example message
+                httpStatus: FORBIDDEN
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /test/hello:
+    get:
+      tags:
+        - test-controller
+      operationId: hello
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+  /library/{libraryId}/subscribers:
+    get:
+      tags:
+        - Library Controller
+      summary: Retrieve information about the subscribers of a specific library
+      description: >-
+        This API endpoint, accessible only to authenticated users, allows them
+        to obtain a list of brief profiles for the subscribers of libraries
+        associated with their account. The response includes relevant details
+        about each library subscriber, presented in the form of UserBriefProfile
+        instances.
+      operationId: getSubscribersList
+      parameters:
+        - name: libraryId
+          in: path
+          description: ID of the library to retrieve subscribers for
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: >-
+            The request was successful. The server has processed the request and
+            the operation was completed without errors.
+          content:
+            application/json:
+              example:
+                - id: 1
+                  userName: teacher1_name
+                  email: teacher1kpi@kpi.ua
+                - id: 2
+                  userName: student1_name
+                  email: student1kpi@kpi.ua
+        '401':
+          description: >-
+            Access to this resource requires authentication. Please log in to
+            your account to gain the necessary permissions and access the
+            requested resource.
+          content:
+            application/json:
+              example:
+                message: Unauthorized example message
+                httpStatus: UNAUTHORIZED
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '403':
+          description: >-
+            Access to the requested resource is forbidden. The authenticated
+            user lacks the necessary permissions to perform the requested
+            operation.
+          content:
+            application/json:
+              example:
+                message: Forbidden example message
+                httpStatus: FORBIDDEN
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '404':
+          description: >-
+            The requested resource could not be found on the server. No data
+            exists for this specific request. Please verify the URL and ensure
+            that the resource exists.
+          content:
+            application/json:
+              example:
+                message: Not found example message
+                httpStatus: NOT_FOUND
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /library/{libraryId}/owners:
+    get:
+      tags:
+        - Library Controller
+      summary: Retrieve information about the owners of a specific library
+      description: >-
+        This API endpoint, accessible only to authenticated users, allows them
+        to obtain a list of brief profiles for the owners of libraries
+        associated with their account. The response includes relevant details
+        about each library owner, presented in the form of UserBriefProfile
+        instances.
+      operationId: getOwnersList
+      parameters:
+        - name: libraryId
+          in: path
+          description: ID of the library to retrieve owners for
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: >-
+            The request was successful. The server has processed the request and
+            the operation was completed without errors.
+          content:
+            application/json:
+              example:
+                - id: 1
+                  userName: teacher1_name
+                  email: teacher1kpi@kpi.ua
+                - id: 2
+                  userName: student1_name
+                  email: student1kpi@kpi.ua
+        '401':
+          description: >-
+            Access to this resource requires authentication. Please log in to
+            your account to gain the necessary permissions and access the
+            requested resource.
+          content:
+            application/json:
+              example:
+                message: Unauthorized example message
+                httpStatus: UNAUTHORIZED
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '403':
+          description: >-
+            Access to the requested resource is forbidden. The authenticated
+            user lacks the necessary permissions to perform the requested
+            operation.
+          content:
+            application/json:
+              example:
+                message: Forbidden example message
+                httpStatus: FORBIDDEN
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '404':
+          description: >-
+            The requested resource could not be found on the server. No data
+            exists for this specific request. Please verify the URL and ensure
+            that the resource exists.
+          content:
+            application/json:
+              example:
+                message: Not found example message
+                httpStatus: NOT_FOUND
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /library/{libraryId}/documents:
+    get:
+      tags:
+        - Library Controller
+      summary: >-
+        Retrieve documents in a library subscribed or owned by the authenticated
+        user
+      description: >-
+        This API endpoint, accessible only to authenticated users, allows them
+        to obtain a list of documents in a library to which they are subscribed
+        or that they own. The response includes relevant details about each
+        document, presented in the form of DocumentDTO (Data Transfer Object)
+        instances.
+      operationId: getDocumentsByLibraryId
+      parameters:
+        - name: libraryId
+          in: path
+          description: ID of the library to retrieve documents for
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: >-
+            The request was successful. The server has processed the request and
+            the operation was completed without errors.
+          content:
+            application/json:
+              example:
+                - id: 4
+                  title: Document 4
+                  topic: Math Science
+                  description: Description for Document 4
+                  owner:
+                    id: 1
+                    userName: student1_name
+                    email: student1kpi@kpi.ua
+                - id: 5
+                  title: Document 5
+                  topic: Math
+                  description: Description for Document 5
+                  owner:
+                    id: 2
+                    userName: teacher1_name
+                    email: teacher1kpi@kpi.ua
+        '401':
+          description: >-
+            Access to this resource requires authentication. Please log in to
+            your account to gain the necessary permissions and access the
+            requested resource.
+          content:
+            application/json:
+              example:
+                message: Unauthorized example message
+                httpStatus: UNAUTHORIZED
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '403':
+          description: >-
+            Access to the requested resource is forbidden. The authenticated
+            user lacks the necessary permissions to perform the requested
+            operation.
+          content:
+            application/json:
+              example:
+                message: Forbidden example message
+                httpStatus: FORBIDDEN
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '404':
+          description: >-
+            The requested resource could not be found on the server. No data
+            exists for this specific request. Please verify the URL and ensure
+            that the resource exists.
+          content:
+            application/json:
+              example:
+                message: Not found example message
+                httpStatus: NOT_FOUND
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /library/university/{universityId}:
+    get:
+      tags:
+        - Library Controller
+      summary: Retrieve all libraries associated with a specified university
+      description: >-
+        This API endpoint is accessible to both authorized and unauthorized
+        users, allowing them to retrieve a list of all open libraries associated
+        with a particular university. The response includes relevant details
+        about each library, presented in the form of LibraryDTO (Data Transfer
+        Object) instances.
+      operationId: getUniversityLibraries
+      parameters:
+        - name: universityId
+          in: path
+          description: ID of the university to retrieve libraries for
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: >-
+            The request was successful. The server has processed the request and
+            the operation was completed without errors.
+          content:
+            application/json:
+              example:
+                libraries:
+                  - id: 3
+                    title: Student1_library1
+                    topic: History
+                    libraryAccess: false
+                  - id: 5
+                    title: Student2_library2
+                    topic: Math
+                    libraryAccess: false
+        '404':
+          description: >-
+            The requested resource could not be found on the server. No data
+            exists for this specific request. Please verify the URL and ensure
+            that the resource exists.
+          content:
+            application/json:
+              example:
+                message: Not found example message
+                httpStatus: NOT_FOUND
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /library/university/{universityId}/findBy:
+    get:
+      tags:
+        - Library Controller
+      summary: Search for libraries based on specific criteria
+      description: >-
+        This API endpoint is accessible to all users, allowing them to search
+        for libraries based on specific criteria such as title, topic, or owner
+        email within a specified university. The response includes relevant
+        details about each matching library, presented in the form of LibraryDTO
+        (Data Transfer Object) instances.
+      operationId: findLibrariesBy
+      parameters:
+        - name: universityId
+          in: path
+          description: ID of the university for which libraries are searched.
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: title
+          in: query
+          description: Filter libraries by title
+          required: false
+          schema:
+            type: string
+        - name: topic
+          in: query
+          description: Filter libraries by topic
+          required: false
+          schema:
+            type: string
+        - name: ownerEmail
+          in: query
+          description: Filter libraries by owner email
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: >-
+            The request was successful. The server has processed the request and
+            the operation was completed without errors.
+          content:
+            application/json:
+              example:
+                libraries:
+                  - id: 3
+                    title: Student1_library1
+                    topic: History
+                    libraryAccess: false
+                  - id: 5
+                    title: Student2_library2
+                    topic: Math
+                    libraryAccess: false
+        '404':
+          description: >-
+            The requested resource could not be found on the server. No data
+            exists for this specific request. Please verify the URL and ensure
+            that the resource exists.
+          content:
+            application/json:
+              example:
+                message: Not found example message
+                httpStatus: NOT_FOUND
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /library/subscribed:
+    get:
+      tags:
+        - Library Controller
+      summary: Retrieve libraries to which the authenticated user is subscribed
+      description: >-
+        This API endpoint enables authenticated users to obtain a list of
+        libraries to which they are subscribed. The response includes relevant
+        details about each subscribed library, presented in the form of
+        LibraryDTO (Data Transfer Object) instances.
+      operationId: getSubscribedLibraries
+      responses:
+        '200':
+          description: >-
+            The request was successful. The server has processed the request and
+            the operation was completed without errors.
+          content:
+            application/json:
+              example:
+                libraries:
+                  - id: 3
+                    title: Student1_library1
+                    topic: History
+                    libraryAccess: false
+                  - id: 5
+                    title: Student2_library2
+                    topic: Math
+                    libraryAccess: false
+        '401':
+          description: >-
+            Access to this resource requires authentication. Please log in to
+            your account to gain the necessary permissions and access the
+            requested resource.
+          content:
+            application/json:
+              example:
+                message: Unauthorized example message
+                httpStatus: UNAUTHORIZED
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '403':
+          description: >-
+            Access to the requested resource is forbidden. The authenticated
+            user lacks the necessary permissions to perform the requested
+            operation.
+          content:
+            application/json:
+              example:
+                message: Forbidden example message
+                httpStatus: FORBIDDEN
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /library/own:
+    get:
+      tags:
+        - Library Controller
+      summary: Retrieve libraries owned by the authenticated user
+      description: >-
+        This API endpoint allows authenticated users to obtain a list of
+        libraries associated with their account. The response includes relevant
+        details about each owned library, presented in the form of LibraryDTO
+        (Data Transfer Object) instances.
+      operationId: getOwnLibraries
+      responses:
+        '200':
+          description: >-
+            The request was successful. The server has processed the request and
+            the operation was completed without errors.
+          content:
+            application/json:
+              example:
+                libraries:
+                  - id: 3
+                    title: Student1_library1
+                    topic: History
+                    libraryAccess: false
+                  - id: 5
+                    title: Student2_library2
+                    topic: Math
+                    libraryAccess: false
+        '401':
+          description: >-
+            Access to this resource requires authentication. Please log in to
+            your account to gain the necessary permissions and access the
+            requested resource.
+          content:
+            application/json:
+              example:
+                message: Unauthorized example message
+                httpStatus: UNAUTHORIZED
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '403':
+          description: >-
+            Access to the requested resource is forbidden. The authenticated
+            user lacks the necessary permissions to perform the requested
+            operation.
+          content:
+            application/json:
+              example:
+                message: Forbidden example message
+                httpStatus: FORBIDDEN
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /library/document/{documentId}/download:
+    get:
+      tags:
+        - Library Controller
+      summary: >-
+        Download a document from a library subscribed or owned by the
+        authenticated user
+      description: >-
+        This API endpoint, accessible only to authenticated users, enables them
+        to download a document from a library to which they are subscribed or
+        that they own. The response includes the document file as a downloadable
+        resource.
+      operationId: downloadDocument
+      parameters:
+        - name: documentId
+          in: path
+          description: ID of the document to be downloaded
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: >-
+            The request was successful. The server has processed the request and
+            the operation was completed without errors.
+          content:
+            application/octet-stream: {}
+        '401':
+          description: >-
+            Access to this resource requires authentication. Please log in to
+            your account to gain the necessary permissions and access the
+            requested resource.
+          content:
+            application/json:
+              example:
+                message: Unauthorized example message
+                httpStatus: UNAUTHORIZED
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '403':
+          description: >-
+            Access to the requested resource is forbidden. The authenticated
+            user lacks the necessary permissions to perform the requested
+            operation.
+          content:
+            application/json:
+              example:
+                message: Forbidden example message
+                httpStatus: FORBIDDEN
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '404':
+          description: >-
+            The requested resource could not be found on the server. No data
+            exists for this specific request. Please verify the URL and ensure
+            that the resource exists.
+          content:
+            application/json:
+              example:
+                message: Not found example message
+                httpStatus: NOT_FOUND
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /library/{libraryId}/delete:
+    delete:
+      tags:
+        - Library Controller
+      summary: Delete a library
+      description: >-
+        This API endpoint is accessible to authenticated users, specifically
+        allowing the owner to delete a library. Users can provide the library ID
+        to be deleted. The response is a standard 204 No Content status,
+        indicating a successful operation without additional response data.
+      operationId: deleteLibrary
+      parameters:
+        - name: libraryId
+          in: path
+          description: ID of the library to be deleted
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: >-
+            The request was successful, but there is no additional content to
+            return. The server has processed the request, and no response body
+            is provided.
+          content:
+            '*/*':
+              schema:
+                type: object
+        '401':
+          description: >-
+            Access to this resource requires authentication. Please log in to
+            your account to gain the necessary permissions and access the
+            requested resource.
+          content:
+            application/json:
+              example:
+                message: Unauthorized example message
+                httpStatus: UNAUTHORIZED
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '403':
+          description: >-
+            Access to the requested resource is forbidden. The authenticated
+            user lacks the necessary permissions to perform the requested
+            operation.
+          content:
+            application/json:
+              example:
+                message: Forbidden example message
+                httpStatus: FORBIDDEN
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '404':
+          description: >-
+            The requested resource could not be found on the server. No data
+            exists for this specific request. Please verify the URL and ensure
+            that the resource exists.
+          content:
+            application/json:
+              example:
+                message: Not found example message
+                httpStatus: NOT_FOUND
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+  /library/document/{documentId}/delete:
+    delete:
+      tags:
+        - Library Controller
+      summary: Delete a document
+      description: >-
+        This API endpoint is accessible to authenticated users, specifically
+        allowing the owner to delete a document. Users can provide the library
+        ID to be deleted. The response is a standard 204 No Content status,
+        indicating a successful operation without additional response data.
+      operationId: deleteDocument
+      parameters:
+        - name: documentId
+          in: path
+          description: ID of the document to be deleted
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: >-
+            The request was successful, but there is no additional content to
+            return. The server has processed the request, and no response body
+            is provided.
+          content:
+            '*/*':
+              schema:
+                type: object
+        '401':
+          description: >-
+            Access to this resource requires authentication. Please log in to
+            your account to gain the necessary permissions and access the
+            requested resource.
+          content:
+            application/json:
+              example:
+                message: Unauthorized example message
+                httpStatus: UNAUTHORIZED
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '403':
+          description: >-
+            Access to the requested resource is forbidden. The authenticated
+            user lacks the necessary permissions to perform the requested
+            operation.
+          content:
+            application/json:
+              example:
+                message: Forbidden example message
+                httpStatus: FORBIDDEN
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+        '404':
+          description: >-
+            The requested resource could not be found on the server. No data
+            exists for this specific request. Please verify the URL and ensure
+            that the resource exists.
+          content:
+            application/json:
+              example:
+                message: Not found example message
+                httpStatus: NOT_FOUND
+                timestamp: '2024-01-04T11:57:16.835Z'
+                path: http://exception/example/path
+components:
+  schemas:
+    LibraryDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 3
+        title:
+          type: string
+          example: library_title
+        topic:
+          type: string
+          example: library_topic
+        libraryAccess:
+          type: boolean
+          example: false
+      description: An object representing a library
+    DocumentDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        topic:
+          type: string
+        description:
+          type: string
+        owner:
+          $ref: '#/components/schemas/UserBriefProfile'
+      description: An object representing a document
+    UserBriefProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        userName:
+          type: string
+        email:
+          type: string
+      description: An object representing a brief user profile
+  securitySchemes:
+    bearerAuth:
+      type: http
+      description: JWT authentication
+      scheme: bearer
+      bearerFormat: JWT

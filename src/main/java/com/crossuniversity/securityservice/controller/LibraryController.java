@@ -4,12 +4,6 @@ import com.crossuniversity.securityservice.dto.DocumentDTO;
 import com.crossuniversity.securityservice.dto.LibraryDTO;
 import com.crossuniversity.securityservice.dto.UserBriefProfile;
 import com.crossuniversity.securityservice.service.LibraryService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -22,8 +16,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
 
-import static com.crossuniversity.securityservice.constant.ResponseCode.*;
-import static com.crossuniversity.securityservice.constant.SwaggerConstant.*;
 import static org.springframework.http.MediaType.*;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
@@ -35,7 +27,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
         exposedHeaders = "*",
         methods = {GET, POST, PUT, DELETE},
         maxAge = 3600)
-@Tag(name = "Library Controller")
 public class LibraryController {
     private final LibraryService libraryService;
 
@@ -45,335 +36,48 @@ public class LibraryController {
         this.libraryService = libraryService;
     }
 
-    @Operation(
-            summary = "Retrieve libraries owned by the authenticated user",
-            description = "This API endpoint allows authenticated users to obtain a list of libraries associated with their account. " +
-                    "The response includes relevant details about each owned library, " +
-                    "presented in the form of LibraryDTO (Data Transfer Object) instances.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = OK,
-                            description = SUCCESSFUL_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = LIBRARY_LIST_EXAMPLE)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = UNAUTHORIZED,
-                            description = UNAUTHORIZED_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = UNAUTHORIZED_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = FORBIDDEN,
-                            description = FORBIDDEN_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = FORBIDDEN_EXCEPTION)
-                            )
-                    )
-            }
-    )
     @GetMapping("/own")
     public ResponseEntity<List<LibraryDTO>> getOwnLibraries() {
         return new ResponseEntity<>(libraryService.getOwnLibraries(), HttpStatus.OK);
     }
 
-    @Operation(
-            summary = "Retrieve libraries to which the authenticated user is subscribed",
-            description = "This API endpoint enables authenticated users to obtain a list of libraries to which they are subscribed. " +
-                    "The response includes relevant details about each subscribed library, " +
-                    "presented in the form of LibraryDTO (Data Transfer Object) instances.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = OK,
-                            description = SUCCESSFUL_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = LIBRARY_LIST_EXAMPLE)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = UNAUTHORIZED,
-                            description = UNAUTHORIZED_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = UNAUTHORIZED_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = FORBIDDEN,
-                            description = FORBIDDEN_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = FORBIDDEN_EXCEPTION)
-                            )
-                    )
-            }
-    )
     @GetMapping("/subscribed")
     public ResponseEntity<List<LibraryDTO>> getSubscribedLibraries() {
         return new ResponseEntity<>(libraryService.getSubscribedLibraries(), HttpStatus.OK);
     }
 
-    @Operation(
-            summary = "Retrieve all libraries associated with a specified university",
-            description = "This API endpoint is accessible to both authorized and unauthorized users, " +
-                    "allowing them to retrieve a list of all open libraries associated with a particular university. " +
-                    "The response includes relevant details about each library, " +
-                    "presented in the form of LibraryDTO (Data Transfer Object) instances.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = OK,
-                            description = SUCCESSFUL_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = LIBRARY_LIST_EXAMPLE)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = NOT_FOUND,
-                            description = NOT_FOUND_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = NOT_FOUND_EXCEPTION)
-                            )
-                    )
-            }
-    )
     @GetMapping("/university/{universityId}")
-    public ResponseEntity<List<LibraryDTO>> getUniversityLibraries(
-            @Parameter(description = "ID of the university to retrieve libraries for")
-            @PathVariable Long universityId) {
+    public ResponseEntity<List<LibraryDTO>> getUniversityLibraries(@PathVariable Long universityId) {
         return new ResponseEntity<>(libraryService.getUniversityLibraries(universityId), HttpStatus.OK);
     }
 
-    @Operation(
-            summary = "Retrieve information about the owners of a specific library",
-            description = "This API endpoint, accessible only to authenticated users, " +
-                    "allows them to obtain a list of brief profiles for the owners of libraries associated with their account. " +
-                    "The response includes relevant details about each library owner, " +
-                    "presented in the form of UserBriefProfile instances.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = OK,
-                            description = SUCCESSFUL_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = BRIEF_PROFILE_LIST_EXAMPLE)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = UNAUTHORIZED,
-                            description = UNAUTHORIZED_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = UNAUTHORIZED_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = FORBIDDEN,
-                            description = FORBIDDEN_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = FORBIDDEN_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = NOT_FOUND,
-                            description = NOT_FOUND_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = NOT_FOUND_EXCEPTION)
-                            )
-                    )
-            }
-    )
     @GetMapping("/{libraryId}/owners")
     public ResponseEntity<List<UserBriefProfile>> getOwnersList(
-            @Parameter(description = "ID of the library to retrieve owners for")
             @PathVariable Long libraryId) {
         return new ResponseEntity<>(libraryService.getOwnersList(libraryId), HttpStatus.OK);
     }
 
-    @Operation(
-            summary = "Retrieve information about the subscribers of a specific library",
-            description = "This API endpoint, accessible only to authenticated users, " +
-                    "allows them to obtain a list of brief profiles for the subscribers of libraries associated with their account. " +
-                    "The response includes relevant details about each library subscriber, " +
-                    "presented in the form of UserBriefProfile instances.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = OK,
-                            description = SUCCESSFUL_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = BRIEF_PROFILE_LIST_EXAMPLE)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = UNAUTHORIZED,
-                            description = UNAUTHORIZED_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = UNAUTHORIZED_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = FORBIDDEN,
-                            description = FORBIDDEN_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = FORBIDDEN_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = NOT_FOUND,
-                            description = NOT_FOUND_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = NOT_FOUND_EXCEPTION)
-                            )
-                    )
-            }
-    )
     @GetMapping("/{libraryId}/subscribers")
-    public ResponseEntity<List<UserBriefProfile>> getSubscribersList(
-            @Parameter(description = "ID of the library to retrieve subscribers for")
-            @PathVariable Long libraryId) {
+    public ResponseEntity<List<UserBriefProfile>> getSubscribersList(@PathVariable Long libraryId) {
         return new ResponseEntity<>(libraryService.getSubscribersList(libraryId), HttpStatus.OK);
     }
 
-    @Operation(
-            summary = "Retrieve documents in a library subscribed or owned by the authenticated user",
-            description = "This API endpoint, accessible only to authenticated users, " +
-                    "allows them to obtain a list of documents in a library to which they are subscribed or that they own. " +
-                    "The response includes relevant details about each document, " +
-                    "presented in the form of DocumentDTO (Data Transfer Object) instances.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = OK,
-                            description = SUCCESSFUL_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = DOCUMENT_LIST_EXAMPLE)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = UNAUTHORIZED,
-                            description = UNAUTHORIZED_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = UNAUTHORIZED_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = FORBIDDEN,
-                            description = FORBIDDEN_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = FORBIDDEN_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = NOT_FOUND,
-                            description = NOT_FOUND_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = NOT_FOUND_EXCEPTION)
-                            )
-                    )
-            }
-    )
     @GetMapping("/{libraryId}/documents")
-    private ResponseEntity<List<DocumentDTO>> getDocumentsByLibraryId(
-            @Parameter(description = "ID of the library to retrieve documents for")
-            @PathVariable Long libraryId) {
+    private ResponseEntity<List<DocumentDTO>> getDocumentsByLibraryId(@PathVariable Long libraryId) {
         return new ResponseEntity<>(libraryService.getDocumentsByLibraryId(libraryId), HttpStatus.OK);
     }
 
-    @Operation(
-            summary = "Search for libraries based on specific criteria",
-            description = "This API endpoint is accessible to all users, " +
-                    "allowing them to search for libraries based on specific criteria such as title, topic, or owner email within a " +
-                    "specified university. The response includes relevant details about each matching library, " +
-                    "presented in the form of LibraryDTO (Data Transfer Object) instances.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = OK,
-                            description = SUCCESSFUL_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = LIBRARY_LIST_EXAMPLE)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = NOT_FOUND,
-                            description = NOT_FOUND_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = NOT_FOUND_EXCEPTION)
-                            )
-                    )
-            }
-    )
     @GetMapping("/university/{universityId}/findBy")
-    public ResponseEntity<List<LibraryDTO>> findLibrariesBy(
-            @Parameter(description = "ID of the university for which libraries are searched.")
-            @PathVariable Long universityId,
-            @Parameter(description = "Filter libraries by title")
-            @RequestParam(required = false) String title,
-            @Parameter(description = "Filter libraries by topic")
-            @RequestParam(required = false) String topic,
-            @Parameter(description = "Filter libraries by owner email")
-            @RequestParam(required = false) String ownerEmail) {
-        return new ResponseEntity<>(libraryService.findLibrariesBy(universityId, title, topic, ownerEmail), HttpStatus.OK);
+    public ResponseEntity<List<LibraryDTO>> findLibrariesBy(@PathVariable Long universityId,
+                                                            @RequestParam(required = false) String title,
+                                                            @RequestParam(required = false) String topic,
+                                                            @RequestParam(required = false) String ownerEmail) {
+        return new ResponseEntity<>(libraryService
+                .findLibrariesBy(universityId, title, topic, ownerEmail), HttpStatus.OK);
     }
 
-    @Operation(
-            summary = "Download a document from a library subscribed or owned by the authenticated user",
-            description = "This API endpoint, accessible only to authenticated users, " +
-                    "enables them to download a document from a library to which they are subscribed or that they own. " +
-                    "The response includes the document file as a downloadable resource.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = OK,
-                            description = SUCCESSFUL_DESCRIPTION,
-                            content = @Content(mediaType = APPLICATION_OCTET_STREAM_VALUE)
-                    ),
-                    @ApiResponse(
-                            responseCode = UNAUTHORIZED,
-                            description = UNAUTHORIZED_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = UNAUTHORIZED_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = FORBIDDEN,
-                            description = FORBIDDEN_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = FORBIDDEN_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = NOT_FOUND,
-                            description = NOT_FOUND_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = NOT_FOUND_EXCEPTION)
-                            )
-                    )
-            }
-    )
     @GetMapping(value = "/document/{documentId}/download")
-    public ResponseEntity<Resource> downloadDocument(
-            @Parameter(description = "ID of the document to be downloaded")
-            @PathVariable Long documentId) throws MalformedURLException {
+    public ResponseEntity<Resource> downloadDocument(@PathVariable Long documentId) throws MalformedURLException {
         Resource resource = libraryService.downloadDocument(documentId);
         return ResponseEntity.ok()
                 .contentType(APPLICATION_OCTET_STREAM)
@@ -382,619 +86,89 @@ public class LibraryController {
                 .body(resource);
     }
 
-    @Operation(
-            summary = "Create a library with specified access settings",
-            description = "This API endpoint allows authenticated users with the role of teacher or higher to create " +
-                    "a library with specific access settings. The method accepts parameters for the library's title, " +
-                    "topic, and access (open or closed). Upon successful execution, it returns a ResponseEntity " +
-                    "containing the created LibraryDTO and an HTTP status code of 201 (CREATED).",
-            responses = {
-                    @ApiResponse(
-                            responseCode = CREATED,
-                            description = CREATED_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = LIBRARY_EXAMPLE)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = UNAUTHORIZED,
-                            description = UNAUTHORIZED_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = UNAUTHORIZED_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = FORBIDDEN,
-                            description = FORBIDDEN_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = FORBIDDEN_EXCEPTION)
-                            )
-                    )
-            }
-    )
+
     @PostMapping("/create-with-access")
-    public ResponseEntity<LibraryDTO> createLibraryWithAccess(
-            @Parameter(description = "The title of the library")
-            @RequestParam String title,
-            @Parameter(description = "The topic of the library")
-            @RequestParam String topic,
-            @Parameter(description = "The access setting for the library (true for open, false for closed)")
-            @RequestParam Boolean libraryAccess) {
+    public ResponseEntity<LibraryDTO> createLibraryWithAccess(@RequestParam String title,
+                                                              @RequestParam String topic,
+                                                              @RequestParam Boolean libraryAccess) {
         return new ResponseEntity<>(libraryService.createLibrary(title, topic, libraryAccess), HttpStatus.CREATED);
     }
 
-    @Operation(
-            summary = "Create a library with default closed access",
-            description = "This API endpoint is accessible to authenticated users, allowing them to create a new library " +
-                    "specifically for students. Libraries created by students always have restricted access. The response " +
-                    "includes relevant details about the created library, " +
-                    "presented in the form of LibraryDTO (Data Transfer Object) instances",
-            responses = {
-                    @ApiResponse(
-                            responseCode = CREATED,
-                            description = CREATED_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = LIBRARY_EXAMPLE)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = UNAUTHORIZED,
-                            description = UNAUTHORIZED_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = UNAUTHORIZED_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = FORBIDDEN,
-                            description = FORBIDDEN_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = FORBIDDEN_EXCEPTION)
-                            )
-                    )
-            }
-    )
     @PostMapping("/create")
-    public ResponseEntity<LibraryDTO> createLibrary(
-            @Parameter(description = "The title of the library")
-            @RequestParam String title,
-            @Parameter(description = "The topic of the library")
-            @RequestParam String topic) {
+    public ResponseEntity<LibraryDTO> createLibrary(@RequestParam String title,
+                                                    @RequestParam String topic) {
         return new ResponseEntity<>(libraryService.createLibrary(title, topic, false), HttpStatus.CREATED);
     }
 
-    @Operation(
-            summary = "Upload a document to a user's library",
-            description = "This API endpoint is accessible to authenticated users, allowing them to upload a document " +
-                    "to their library. Users can provide details such as the file, title, topic, description, and the " +
-                    "library ID where the document should be uploaded. The response includes relevant details about the " +
-                    "uploaded document, presented in the form of DocumentDTO (Data Transfer Object) instances.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = CREATED,
-                            description = CREATED_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = DOCUMENT_EXAMPLE)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = UNAUTHORIZED,
-                            description = UNAUTHORIZED_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = UNAUTHORIZED_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = FORBIDDEN,
-                            description = FORBIDDEN_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = FORBIDDEN_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = NOT_FOUND,
-                            description = NOT_FOUND_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = NOT_FOUND_EXCEPTION)
-                            )
-                    )
-            }
-    )
     @PostMapping(value = "/{libraryId}/document/upload", consumes = MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<DocumentDTO> uploadDocument(
-            @Parameter(description = "The document file to be uploaded")
-            @RequestParam("file") MultipartFile file,
-            @Parameter(description = "The title of the document")
-            @RequestParam String title,
-            @Parameter(description = "The topic of the document")
-            @RequestParam String topic,
-            @Parameter(description = "The description of the document")
-            @RequestParam String description,
-            @Parameter(description = "ID of the library to which the document will be uploaded")
-            @PathVariable Long libraryId) throws IOException {
+    public ResponseEntity<DocumentDTO> uploadDocument(@RequestParam("file") MultipartFile file,
+                                                      @RequestParam String title,
+                                                      @RequestParam String topic,
+                                                      @RequestParam String description,
+                                                      @PathVariable Long libraryId) throws IOException {
 
         return new ResponseEntity<>(libraryService
                 .uploadDocument(file, title, topic, description, libraryId), HttpStatus.CREATED);
     }
 
-    @Operation(
-            summary = "Subscribe to a library",
-            description = "This API endpoint is accessible to authenticated users, enabling them to subscribe to a library. " +
-                    "Users can provide the library ID to which they want to subscribe. The response includes the updated list" +
-                    " of libraries to which the user is subscribed, presented in the form of LibraryDTO " +
-                    "(Data Transfer Object) instances.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = OK,
-                            description = SUCCESSFUL_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = LIBRARY_LIST_EXAMPLE)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = UNAUTHORIZED,
-                            description = UNAUTHORIZED_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = UNAUTHORIZED_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = BAD_REQUEST,
-                            description = BAD_REQUEST_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = BAD_REQUEST_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = NOT_FOUND,
-                            description = NOT_FOUND_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = NOT_FOUND_EXCEPTION)
-                            )
-                    )
-            }
-    )
+
     @PutMapping("/{libraryId}/subscribe")
-    public ResponseEntity<List<LibraryDTO>> subscribeToLibrary(
-            @Parameter(description = "ID of the library to which the user wants to subscribe")
-            @PathVariable Long libraryId) {
+    public ResponseEntity<List<LibraryDTO>> subscribeToLibrary(@PathVariable Long libraryId) {
         return new ResponseEntity<>(libraryService.subscribeToLibrary(libraryId), HttpStatus.OK);
     }
 
-    @Operation(
-            summary = "Subscribe a user to a library",
-            description = "This API endpoint is accessible to authenticated users, enabling them to subscribe another " +
-                    "user to a library they own. Users can provide the library ID and the email of the user they " +
-                    "want to subscribe. The response is a standard 204 No Content status, indicating a successful " +
-                    "operation without additional response data.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = NO_CONTENT,
-                            description = NO_CONTENT_DESCRIPTION
-                    ),
-                    @ApiResponse(
-                            responseCode = BAD_REQUEST,
-                            description = BAD_REQUEST_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = BAD_REQUEST_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = UNAUTHORIZED,
-                            description = UNAUTHORIZED_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = UNAUTHORIZED_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = FORBIDDEN,
-                            description = FORBIDDEN_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = FORBIDDEN_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = NOT_FOUND,
-                            description = NOT_FOUND_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = NOT_FOUND_EXCEPTION)
-                            )
-                    )
-            }
-    )
     @PutMapping("{libraryId}/subscribe/{email}")
-    public ResponseEntity<?> subscribeUser(
-            @Parameter(description = "ID of the library to which the user wants to subscribe another user")
-            @PathVariable Long libraryId,
-            @Parameter(description = "The email of the user to be subscribed")
-            @PathVariable String email) {
+    public ResponseEntity<?> subscribeUser(@PathVariable Long libraryId,
+                                           @PathVariable String email) {
         libraryService.subscribeUser(libraryId, email);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Operation(
-            summary = "Unsubscribe a user from a library",
-            description = "This API endpoint is accessible to authenticated users, allowing them to unsubscribe another " +
-                    "user from a library they own. Users can provide the library ID and the email of the user they " +
-                    "want to unsubscribe. The response is a standard 204 No Content status, indicating a successful " +
-                    "operation without additional response data.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = NO_CONTENT,
-                            description = NO_CONTENT_DESCRIPTION
-                    ),
-                    @ApiResponse(
-                            responseCode = UNAUTHORIZED,
-                            description = UNAUTHORIZED_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = UNAUTHORIZED_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = FORBIDDEN,
-                            description = FORBIDDEN_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = FORBIDDEN_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = NOT_FOUND,
-                            description = NOT_FOUND_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = NOT_FOUND_EXCEPTION)
-                            )
-                    )
-            }
-    )
     @PutMapping("{libraryId}/unsubscribe/{email}")
-    public ResponseEntity<?> unsubscribeUser(
-            @Parameter(description = "ID of the library from which the user wants to unsubscribe another user")
-            @PathVariable Long libraryId,
-            @Parameter(description = "The email of the user to be unsubscribed")
-            @PathVariable String email) {
+    public ResponseEntity<?> unsubscribeUser(@PathVariable Long libraryId,
+                                             @PathVariable String email) {
         libraryService.unsubscribeUser(libraryId, email);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Operation(
-            summary = "Unsubscribe from a library",
-            description = "This API endpoint is accessible to authenticated users, allowing them to unsubscribe from " +
-                    "a library to which they are subscribed. Users can provide the library ID from which they want to " +
-                    "unsubscribe. The response includes the updated list of libraries from which the user is unsubscribed, " +
-                    "presented in the form of LibraryDTO (Data Transfer Object) instances.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = OK,
-                            description = SUCCESSFUL_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = LIBRARY_LIST_EXAMPLE)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = UNAUTHORIZED,
-                            description = UNAUTHORIZED_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = UNAUTHORIZED_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = NOT_FOUND,
-                            description = NOT_FOUND_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = NOT_FOUND_EXCEPTION)
-                            )
-                    )
-            }
-    )
     @PutMapping("/{libraryId}/unsubscribe")
-    public ResponseEntity<List<LibraryDTO>> unsubscribeLibrary(
-            @Parameter(description = "ID of the library from which the user wants to unsubscribe")
-            @PathVariable Long libraryId) {
+    public ResponseEntity<List<LibraryDTO>> unsubscribeLibrary(@PathVariable Long libraryId) {
         return new ResponseEntity<>(libraryService.unsubscribeLibrary(libraryId), HttpStatus.OK);
     }
 
-    @Operation(
-            summary = "Add an existing document to a library",
-            description = "This API endpoint is accessible to authenticated users, allowing them to add an existing document " +
-                    "from other libraries to libraries they own. Users can provide the library ID and the document ID to be " +
-                    "added. The response is a standard 204 No Content status, indicating a successful operation without " +
-                    "additional response data.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = NO_CONTENT,
-                            description = NO_CONTENT_DESCRIPTION
-                    ),
-                    @ApiResponse(
-                            responseCode = UNAUTHORIZED,
-                            description = UNAUTHORIZED_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = UNAUTHORIZED_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = FORBIDDEN,
-                            description = FORBIDDEN_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = FORBIDDEN_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = NOT_FOUND,
-                            description = NOT_FOUND_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = NOT_FOUND_EXCEPTION)
-                            )
-                    )
-            }
-    )
     @PutMapping("/{libraryId}/document/{documentId}/add")
-    public ResponseEntity<?> addExistedDocumentToLibrary(
-            @Parameter(description = "ID of the library to which the user wants to add an existing document")
-            @PathVariable Long libraryId,
-            @Parameter(description = "ID of the existing document to be added")
-            @PathVariable Long documentId) {
+    public ResponseEntity<?> addExistedDocumentToLibrary(@PathVariable Long libraryId,
+                                                         @PathVariable Long documentId) {
         libraryService.addExistedDocumentToLibrary(libraryId, documentId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Operation(
-            summary = "Remove an existing document from a library",
-            description = "This API endpoint is accessible to authenticated users, allowing them to remove an " +
-                    "existing document from their library, specifically documents that were added from other " +
-                    "libraries. Users can provide the library ID and the document ID to be removed. The response " +
-                    "is a standard 204 No Content status, indicating a successful operation without additional response data.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = NO_CONTENT,
-                            description = NO_CONTENT_DESCRIPTION
-                    ),
-                    @ApiResponse(
-                            responseCode = UNAUTHORIZED,
-                            description = UNAUTHORIZED_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = UNAUTHORIZED_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = FORBIDDEN,
-                            description = FORBIDDEN_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = FORBIDDEN_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = NOT_FOUND,
-                            description = NOT_FOUND_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = NOT_FOUND_EXCEPTION)
-                            )
-                    )
-            }
-    )
     @PutMapping("/{libraryId}/document/{documentId}/remove")
-    public ResponseEntity<?> removeDocumentFromLibrary(
-            @Parameter(description = "ID of the library from which the user wants to remove an existing document")
-            @PathVariable Long libraryId,
-            @Parameter(description = "ID of the existing document to be removed")
-            @PathVariable Long documentId) {
+    public ResponseEntity<?> removeDocumentFromLibrary(@PathVariable Long libraryId,
+                                                       @PathVariable Long documentId) {
         libraryService.removeExistedDocumentFromLibrary(libraryId, documentId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Operation(
-            summary = "Update library information",
-            description = "This API endpoint is accessible to authenticated users, allowing them to update the " +
-                    "title and topic of a library they own. Users can provide a LibraryDTO (Data Transfer Object) " +
-                    "containing the updated information. The response includes the updated LibraryDTO instance representing " +
-                    "the modified library.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = OK,
-                            description = SUCCESSFUL_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = LIBRARY_EXAMPLE)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = UNAUTHORIZED,
-                            description = UNAUTHORIZED_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = UNAUTHORIZED_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = FORBIDDEN,
-                            description = FORBIDDEN_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = FORBIDDEN_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = NOT_FOUND,
-                            description = NOT_FOUND_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = NOT_FOUND_EXCEPTION)
-                            )
-                    )
-            }
-    )
     @PutMapping("/update")
-    public ResponseEntity<LibraryDTO> updateLibrary(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-                    examples = @ExampleObject(value = LIBRARY_EXAMPLE)
-            ))
-            @RequestBody LibraryDTO libraryDTO) {
+    public ResponseEntity<LibraryDTO> updateLibrary(@RequestBody LibraryDTO libraryDTO) {
         return new ResponseEntity<>(libraryService.updateLibrary(libraryDTO), HttpStatus.OK);
     }
 
 
-    @Operation(
-            summary = "Update document information",
-            description = "This API endpoint is accessible to authenticated users, specifically allowing the owner " +
-                    "to update information about a document, including the title, topic, and description. Users can " +
-                    "provide a DocumentDTO (Data Transfer Object) containing the updated information. The response " +
-                    "includes the updated DocumentDTO instance representing the modified document.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = OK,
-                            description = SUCCESSFUL_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = DOCUMENT_EXAMPLE)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = UNAUTHORIZED,
-                            description = UNAUTHORIZED_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = UNAUTHORIZED_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = FORBIDDEN,
-                            description = FORBIDDEN_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = FORBIDDEN_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = NOT_FOUND,
-                            description = NOT_FOUND_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = NOT_FOUND_EXCEPTION)
-                            )
-                    )
-            }
-    )
     @PutMapping("/document/update")
-    public ResponseEntity<DocumentDTO> updateDocument(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-                    examples = @ExampleObject(value = DOCUMENT_UPDATE_EXAMPLE)
-            ))
-            @RequestBody DocumentDTO documentDTO) {
+    public ResponseEntity<DocumentDTO> updateDocument(@RequestBody DocumentDTO documentDTO) {
         return new ResponseEntity<>(libraryService.updateDocument(documentDTO), HttpStatus.OK);
     }
 
-    @Operation(
-            summary = "Delete a library",
-            description = "This API endpoint is accessible to authenticated users, specifically allowing the owner to delete " +
-                    "a library. Users can provide the library ID to be deleted. The response is a standard 204 No " +
-                    "Content status, indicating a successful operation without additional response data.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = NO_CONTENT,
-                            description = NO_CONTENT_DESCRIPTION
-                    ),
-                    @ApiResponse(
-                            responseCode = UNAUTHORIZED,
-                            description = UNAUTHORIZED_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = UNAUTHORIZED_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = FORBIDDEN,
-                            description = FORBIDDEN_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = FORBIDDEN_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = NOT_FOUND,
-                            description = NOT_FOUND_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = NOT_FOUND_EXCEPTION)
-                            )
-                    )
-            }
-    )
     @DeleteMapping("/{libraryId}/delete")
-    public ResponseEntity<?> deleteLibrary(
-            @Parameter(description = "ID of the library to be deleted")
-            @PathVariable Long libraryId) {
+    public ResponseEntity<?> deleteLibrary(@PathVariable Long libraryId) {
         libraryService.deleteLibrary(libraryId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Operation(
-            summary = "Delete a document",
-            description = "This API endpoint is accessible to authenticated users, specifically allowing the owner to delete " +
-                    "a document. Users can provide the library ID to be deleted. The response is a standard 204 No " +
-                    "Content status, indicating a successful operation without additional response data.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = NO_CONTENT,
-                            description = NO_CONTENT_DESCRIPTION
-                    ),
-                    @ApiResponse(
-                            responseCode = UNAUTHORIZED,
-                            description = UNAUTHORIZED_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = UNAUTHORIZED_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = FORBIDDEN,
-                            description = FORBIDDEN_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = FORBIDDEN_EXCEPTION)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = NOT_FOUND,
-                            description = NOT_FOUND_DESCRIPTION,
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    examples = @ExampleObject(value = NOT_FOUND_EXCEPTION)
-                            )
-                    )
-            }
-    )
     @DeleteMapping("/document/{documentId}/delete")
-    public ResponseEntity<?> deleteDocument(
-            @Parameter(description = "ID of the document to be deleted")
-            @PathVariable Long documentId) {
+    public ResponseEntity<?> deleteDocument(@PathVariable Long documentId) {
         libraryService.deleteDocument(documentId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

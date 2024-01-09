@@ -1,7 +1,6 @@
 package com.crossuniversity.securityservice.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +10,6 @@ import java.util.List;
 @Data
 @Builder
 @AllArgsConstructor
-@Schema(description = "An object representing a full user profile")
 
 public class UserProfileDTO {
     private Long id;
