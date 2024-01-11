@@ -6,7 +6,6 @@ import com.crossuniversity.securityservice.exception.bad_request.NotMatchExcepti
 import com.crossuniversity.securityservice.repository.UserCredentialsRepository;
 import com.crossuniversity.securityservice.utils.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.expression.AccessException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -41,10 +40,9 @@ public class PasswordChangingService {
 
         String secretCode = securityUtils.generateRandomSequence();
         String email = userCredentials.getEmail();
-
         log.info("Generated secret code for " + email + " is " + secretCode);
 
-        mailService.addSecretCodes(email, secretCode);
+        universityUser.setSecretCode(secretCode);
         mailService.sendEmail(email, PASSWORD_CHANGE_SUBJECT,
                 passwordChangeMessage(universityUser.getUserName(), secretCode));
     }
@@ -55,7 +53,7 @@ public class PasswordChangingService {
 
         log.info("Provided secret code for " + userCredentials.getEmail() + " is " + copiedSecretCode);
 
-        if (!copiedSecretCode.equals(mailService.getSecretCodes().get(userCredentials.getEmail())))
+        if (!copiedSecretCode.equals(universityUser.getSecretCode()))
             throw new NotMatchException("Provided secret code does not match with the code which was sent to the mail");
 
         userCredentials.setPassword(passwordEncoder.encode(newPassword));

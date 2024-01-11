@@ -3,7 +3,10 @@ package com.crossuniversity.securityservice.controller;
 import com.crossuniversity.securityservice.dto.DocumentDTO;
 import com.crossuniversity.securityservice.dto.LibraryDTO;
 import com.crossuniversity.securityservice.dto.UserBriefProfile;
+import com.crossuniversity.securityservice.model.DownloadedFile;
 import com.crossuniversity.securityservice.service.LibraryService;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -13,9 +16,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.List;
 
+import static com.crossuniversity.securityservice.constant.ValidationViolation.BLANK_EMAIL;
+import static com.crossuniversity.securityservice.constant.ValidationViolation.EMAIL_NOT_RECOGNIZED;
 import static org.springframework.http.MediaType.*;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
@@ -77,12 +81,14 @@ public class LibraryController {
     }
 
     @GetMapping(value = "/document/{documentId}/download")
-    public ResponseEntity<Resource> downloadDocument(@PathVariable Long documentId) throws MalformedURLException {
-        Resource resource = libraryService.downloadDocument(documentId);
+    public ResponseEntity<Resource> downloadDocument(@PathVariable Long documentId) throws IOException {
+        DownloadedFile downloadedFile = libraryService.downloadDocument(documentId);
+        Resource resource = downloadedFile.getResource();
+
         return ResponseEntity.ok()
                 .contentType(APPLICATION_OCTET_STREAM)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\""
-                        + resource.getFilename() + "\"")
+                        + downloadedFile.getFileName() + "\"")
                 .body(resource);
     }
 
@@ -119,6 +125,8 @@ public class LibraryController {
 
     @PutMapping("{libraryId}/subscribe/{email}")
     public ResponseEntity<?> subscribeUser(@PathVariable Long libraryId,
+                                           @NotBlank(message = BLANK_EMAIL)
+                                           @Email(message = EMAIL_NOT_RECOGNIZED)
                                            @PathVariable String email) {
         libraryService.subscribeUser(libraryId, email);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -126,6 +134,8 @@ public class LibraryController {
 
     @PutMapping("{libraryId}/unsubscribe/{email}")
     public ResponseEntity<?> unsubscribeUser(@PathVariable Long libraryId,
+                                             @NotBlank(message = BLANK_EMAIL)
+                                             @Email(message = EMAIL_NOT_RECOGNIZED)
                                              @PathVariable String email) {
         libraryService.unsubscribeUser(libraryId, email);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

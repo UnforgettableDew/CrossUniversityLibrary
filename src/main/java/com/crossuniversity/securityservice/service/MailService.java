@@ -1,18 +1,17 @@
 package com.crossuniversity.securityservice.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.HashSet;
 
 @Service
+@Slf4j
 public class MailService {
 
     private final JavaMailSender javaMailSender;
-    private HashMap<String, String> secretCodes = new HashMap<>();
 
     @Autowired
     public MailService(JavaMailSender javaMailSender) {
@@ -26,15 +25,8 @@ public class MailService {
         message.setText(body);
 
         javaMailSender.send(message);
-        System.out.println(message.toString());
+        log.info(message.toString());
     }
 
-    public HashMap<String, String> getSecretCodes() {
-        return secretCodes;
-    }
-
-    public void addSecretCodes(String email, String secretCode) {
-        this.secretCodes.put(email, secretCode);
-    }
 }
 

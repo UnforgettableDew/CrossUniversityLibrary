@@ -1,7 +1,7 @@
 package com.crossuniversity.securityservice.service;
 
 import com.crossuniversity.securityservice.auth.AuthenticationResponse;
-import com.crossuniversity.securityservice.dto.CredentialDTO;
+import com.crossuniversity.securityservice.dto.CredentialsDTO;
 import com.crossuniversity.securityservice.entity.University;
 import com.crossuniversity.securityservice.entity.UniversityUser;
 import com.crossuniversity.securityservice.entity.UserCredentials;
@@ -94,7 +94,7 @@ public class AuthenticationService {
     }
 
 
-    public CredentialDTO superiorRegistration(String email, String role){
+    public CredentialsDTO superiorRegistration(String email, String role){
         checkEmailExistence(email);
         String domain = extractDomain(email);
 
@@ -111,7 +111,7 @@ public class AuthenticationService {
 
         mailService.sendEmail(email, RANDOM_PASSWORD_SUBJECT,
                 randomPasswordMessage(email, randomPassword, role));
-        return new CredentialDTO(email, randomPassword);
+        return new CredentialsDTO(email, randomPassword);
     }
 
     private UserCredentials saveUser(String email,

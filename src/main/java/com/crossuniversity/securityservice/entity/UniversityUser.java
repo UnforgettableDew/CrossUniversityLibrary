@@ -28,6 +28,9 @@ public class UniversityUser {
     @Column(name = "space")
     private Double space;
 
+    @Transient
+    private String secretCode;
+
     @ManyToOne(cascade = ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "university_id")
     @JsonIgnore

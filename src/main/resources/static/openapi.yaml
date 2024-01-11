@@ -846,6 +846,14 @@ paths:
             '*/*':
               schema:
                 type: string
+  /test/s3:
+    get:
+      tags:
+        - test-controller
+      responses:
+        '200':
+          description: s3 buckets
+
   /library/{libraryId}/document/upload:
     post:
       tags:

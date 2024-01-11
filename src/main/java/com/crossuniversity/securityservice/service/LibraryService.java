@@ -17,6 +17,7 @@ import com.crossuniversity.securityservice.exception.not_found.UserNotFoundExcep
 import com.crossuniversity.securityservice.mapper.BriefProfileMapper;
 import com.crossuniversity.securityservice.mapper.DocumentMapper;
 import com.crossuniversity.securityservice.mapper.LibraryMapper;
+import com.crossuniversity.securityservice.model.DownloadedFile;
 import com.crossuniversity.securityservice.repository.DocumentRepository;
 import com.crossuniversity.securityservice.repository.LibraryRepository;
 import com.crossuniversity.securityservice.repository.UniversityRepository;
@@ -24,17 +25,16 @@ import com.crossuniversity.securityservice.repository.UniversityUserRepository;
 import com.crossuniversity.securityservice.utils.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -47,6 +47,10 @@ public class LibraryService {
     private final BriefProfileMapper briefProfileMapper;
     private final DocumentRepository documentRepository;
     private final SecurityUtils securityUtils;
+    private final S3Service s3Service;
+
+    @Value("${application.aws.bucket}")
+    private String bucket;
 
     @Autowired
     public LibraryService(UniversityUserRepository universityUserRepository,
@@ -56,7 +60,8 @@ public class LibraryService {
                           DocumentMapper documentMapper,
                           BriefProfileMapper briefProfileMapper,
                           DocumentRepository documentRepository,
-                          SecurityUtils securityUtils) {
+                          SecurityUtils securityUtils,
+                          S3Service s3Service) {
         this.universityUserRepository = universityUserRepository;
         this.universityRepository = universityRepository;
         this.libraryRepository = libraryRepository;
@@ -65,6 +70,7 @@ public class LibraryService {
         this.briefProfileMapper = briefProfileMapper;
         this.documentRepository = documentRepository;
         this.securityUtils = securityUtils;
+        this.s3Service = s3Service;
     }
 
     public List<LibraryDTO> getOwnLibraries() {
@@ -237,10 +243,20 @@ public class LibraryService {
         return libraryMapper.mapToListDTO(libraryRepository.findLibrariesByTitleAndTopicAndOwner(title, topic, ownerEmail));
     }
 
-    public Resource downloadDocument(Long documentId) throws MalformedURLException {
+    public DownloadedFile downloadDocument(Long documentId) throws IOException {
+        UniversityUser universityUser = securityUtils.getUserFromSecurityContextHolder();
+        checkDocumentOwnerAccess(documentId, universityUser);
+
         Document document = getDocumentById(documentId);
-        Path path = Paths.get(document.getFilePath());
-        return new UrlResource(path.toUri());
+
+        String filePath = document.getFilePath();
+        String fileName = extractFileName(filePath);
+
+        ByteArrayResource resource = new ByteArrayResource(
+                s3Service.downloadFile(bucket, filePath)
+        );
+
+        return new DownloadedFile(fileName, resource);
     }
 
     public DocumentDTO uploadDocument(MultipartFile file,
@@ -253,25 +269,24 @@ public class LibraryService {
 
         Library library = libraryRepository.findById(libraryId).orElseThrow();
 
-        String path = "D:\\CrossUniversityLibrary\\";
+        String email = universityUser.getUserCredentials().getEmail();
+        String path = email + "/" + file.getOriginalFilename();
 
         Document document = Document.builder()
                 .title(title)
                 .topic(topic)
                 .description(description)
-                .filePath(path + file.getOriginalFilename())
+                .filePath(path)
                 .fileSize(file.getSize() / 1_000_000.0)
                 .libraries(new ArrayList<>())
                 .owner(universityUser)
                 .build();
 
+        s3Service.uploadFile(bucket, path, file.getBytes());
         universityUser.decreaseSpace(document.getFileSize());
 
         library.addDocument(document);
         documentRepository.save(document);
-
-        Path filePath = Paths.get(path, file.getOriginalFilename());
-        file.transferTo(filePath.toFile());
 
         return documentMapper.mapToDTO(document);
     }
@@ -300,6 +315,8 @@ public class LibraryService {
             throw new DocumentAccessException("You are not the owner of this document");
 
         Document document = getDocumentById(documentId);
+
+        s3Service.deleteFile(bucket, document.getFilePath());
 
         universityUser.increaseSpace(document.getFileSize());
 
@@ -378,5 +395,16 @@ public class LibraryService {
                 return true;
         }
         return false;
+    }
+
+    private String extractFileName(String path) {
+        String regex = "[^/]+$";
+
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(path);
+
+        if (matcher.find())
+            return matcher.group();
+        else throw new DocumentBadRequestException("Could not extract file name");
     }
 }

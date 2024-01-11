@@ -49,7 +49,8 @@ public class SecurityConfig {
                         "/swagger-ui/**",
                         "/v3/api-docs/**",
                         "/openapi.yaml",
-                        "/swagger-resources/**", "/test/**",
+                        "/swagger-resources/**",
+                        "/test/**",
                         "/library/university/**").permitAll()
                 .requestMatchers("/library/create-with-access")
                 .hasAnyRole(TEACHER.name(), UNIVERSITY_ADMIN.name(), GLOBAL_ADMIN.name())

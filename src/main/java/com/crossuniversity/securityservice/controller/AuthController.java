@@ -1,7 +1,7 @@
 package com.crossuniversity.securityservice.controller;
 
 import com.crossuniversity.securityservice.auth.AuthenticationResponse;
-import com.crossuniversity.securityservice.dto.CredentialDTO;
+import com.crossuniversity.securityservice.dto.CredentialsDTO;
 import com.crossuniversity.securityservice.service.AuthenticationService;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -50,7 +50,7 @@ public class AuthController {
     }
 
     @PostMapping("/teacher-registration")
-    public ResponseEntity<CredentialDTO> teacherRegistration(
+    public ResponseEntity<CredentialsDTO> teacherRegistration(
             @NotBlank(message = BLANK_EMAIL)
             @Email(message = EMAIL_NOT_RECOGNIZED)
             @RequestParam String email) {
@@ -58,7 +58,7 @@ public class AuthController {
     }
 
     @PostMapping("/university-admin-registration")
-    public ResponseEntity<CredentialDTO> universityAdminRegistration(
+    public ResponseEntity<CredentialsDTO> universityAdminRegistration(
             @NotBlank(message = BLANK_EMAIL)
             @Email(message = EMAIL_NOT_RECOGNIZED)
             @RequestParam String email) {
