@@ -1,13 +1,13 @@
 spring:
   datasource:
-    username: 'unforgettable'
-    password: 'password'
-    url: jdbc:postgresql://localhost:5432/library_database
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    url: ${DB_URL}
   flyway:
     enabled: true
-    url: jdbc:postgresql://localhost:5432/library_database
-    user: 'unforgettable'
-    password: 'password'
+    url: ${DB_URL}
+    user: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     properties:
       hibernate:
@@ -17,8 +17,8 @@ spring:
   mail:
     host: 'smtp.gmail.com'
     port: 587
-    username: 'sagittariusdew@gmail.com'
-    password: 'ecmmwabvoyrtmrfe'
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -33,15 +33,17 @@ springdoc:
   swagger-ui:
     url: openapi.yaml
 application:
+  title: CrossUniversityLibrary
+  version: 1.0.0
   security:
     jwt:
-      secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      secret-key: ${JWT_SECRET_KEY}
       access-token:
         expiration: 600000000 # 86400000 # a day
       refresh-token:
         expiration: 604800000 # 7 days
   aws:
-    bucket: cross-universtiry-library
-    accessKeyId: AKIAWBC2XYYA4R7FBHNB
-    secretAccessKey: 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
-    region: us-east-1
+    bucket: ${AWS_BUCKET}
+    accessKeyId: ${AWS_ACCESS_KEY_ID}
+    secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
+    region: ${AWS_REGION}
