@@ -8,11 +8,11 @@
         <version>3.0.6</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.crossuniversity</groupId>
-    <artifactId>SecurityService</artifactId>
+    <groupId>com.unforgettable</groupId>
+    <artifactId>crossuniversitylibrary</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>SecurityService</name>
-    <description>SecurityService</description>
+    <name>CrossUniversityLibrary</name>
+    <description>CrossUniversityLibrary</description>
     <properties>
         <java.version>17</java.version>
         <spring-cloud.version>2022.0.4</spring-cloud.version>
