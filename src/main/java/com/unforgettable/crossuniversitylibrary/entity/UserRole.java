@@ -1,5 +1,6 @@
 package com.unforgettable.crossuniversitylibrary.entity;
 
+import com.unforgettable.crossuniversitylibrary.enums.UserRoles;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,5 +18,6 @@ public class UserRole {
     private Long id;
 
     @Column(name = "role_name", nullable = false)
-    private String roleName;
+    @Enumerated(EnumType.STRING)
+    private UserRoles roleName;
 }

@@ -70,7 +70,7 @@ public class AppUserDetails implements UserDetails {
 
     public static AppUserDetails convertToUserDetails(UserCredentials userCredentials) {
         return new AppUserDetails(
-                Set.of(new SimpleGrantedAuthority("ROLE_" + userCredentials.getRole().getRoleName())),
+                userCredentials.getRole().getRoleName().getSimpleGrantedAuthority(),
                 userCredentials.getPassword(),
                 userCredentials.getEmail(),
                 true,
